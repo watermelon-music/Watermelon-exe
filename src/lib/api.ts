@@ -43,9 +43,18 @@ export const api = {
   search: (q: string) => get<Song[]>('/search', { q }),
   stats: () => get<AppStats>('/stats'),
   leaderboard: (limit = 50) => get<LeaderboardUser[]>('/api/leaderboard', { limit: String(limit) }),
-  recommendations: () => get<Song[]>('/api/recommendations'),
+  recommendations: async (data: { title: string, artist: string, language?: string, genre?: string }) => {
+    const res = await fetch(`${BASE}/api/recommendations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    return res.json()
+  },
   releases: () => get<any[]>('/releases'),
-  streamUrl: (id: string) => `${BASE}/play/${id}`,
+  
+  getArtist: (id: string) => get<any>(`/api/artists/${id}`),
+  getArtistSongs: (id: string, limit = 50) => get<Song[]>(`/api/artists/${id}/songs`, { limit: String(limit) }),
 
   createOrder: async (data: {
     userId: string

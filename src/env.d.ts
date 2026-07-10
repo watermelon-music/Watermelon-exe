@@ -24,6 +24,9 @@ declare global {
         onUpdateDownloaded: (cb: () => void) => void
         install: () => Promise<void>
       }
+      ytdl: {
+        getStreamUrl: (id: string) => Promise<string | null>
+      }
       platform: string
     }
   }

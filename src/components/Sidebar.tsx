@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Search, Library, Trophy, Crown, User } from 'lucide-react'
+import { Home, Search, Library, Trophy, Crown, User, Radio } from 'lucide-react'
 import { useAuthStore } from '../lib/store'
 import { getInitials } from '../lib/utils'
 
@@ -7,6 +7,7 @@ const navItems = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/search', icon: Search, label: 'Search' },
   { to: '/library', icon: Library, label: 'Library' },
+  { to: '/radio', icon: Radio, label: 'Radio' },
   { to: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
   { to: '/premium', icon: Crown, label: 'Premium' },
 ]

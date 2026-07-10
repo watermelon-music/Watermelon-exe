@@ -10,7 +10,7 @@ export function Home() {
 
   useEffect(() => {
     Promise.all([
-      api.recommendations().catch(() => []),
+      api.search('latest hits').catch(() => []),
       api.stats().catch(() => null),
     ]).then(([recs, s]) => {
       setRecommendations(recs)

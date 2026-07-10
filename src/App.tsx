@@ -15,6 +15,8 @@ import { Library } from './pages/Library'
 import { Leaderboard } from './pages/Leaderboard'
 import { Premium } from './pages/Premium'
 import { ProfilePage } from './pages/Profile'
+import { Artist } from './pages/Artist'
+import { Radio } from './pages/Radio'
 
 export default function App() {
   const { user, isLoading, setUser, setSession, setProfile, setLoading } = useAuthStore()
@@ -94,6 +96,8 @@ export default function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/premium" element={<Premium />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/artist/:id" element={<Artist />} />
+          <Route path="/radio" element={<Radio />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Player />

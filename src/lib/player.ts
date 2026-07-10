@@ -38,11 +38,29 @@ class AudioPlayerEngine {
     })
   }
 
-  load(songId: string) {
+  async load(songId: string) {
     if (this.currentId === songId) return
     this.currentId = songId
-    this.audio.src = api.streamUrl(songId)
-    this.audio.load()
+    
+    // Fallback/clear src while loading
+    this.audio.src = ''
+    usePlayerStore.setState({ isBuffering: true })
+    
+    try {
+      const url = await window.electron.ytdl.getStreamUrl(songId)
+      if (url && this.currentId === songId) {
+        this.audio.src = url
+        this.audio.load()
+        if (usePlayerStore.getState().isPlaying) {
+          this.audio.play().catch(() => {})
+        }
+      } else if (!url) {
+        throw new Error('Failed to get stream url')
+      }
+    } catch (err) {
+      console.error('Playback error:', err)
+      usePlayerStore.setState({ isPlaying: false, isBuffering: false })
+    }
   }
 
   play() { this.audio.play().catch(() => {}) }

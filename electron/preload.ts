@@ -12,5 +12,8 @@ contextBridge.exposeInMainWorld('electron', {
     onUpdateDownloaded: (cb: () => void) => ipcRenderer.on('update:downloaded', cb),
     install: () => ipcRenderer.invoke('update:install'),
   },
+  ytdl: {
+    getStreamUrl: (id: string) => ipcRenderer.invoke('ytdl:get-stream-url', id),
+  },
   platform: process.platform,
 })
