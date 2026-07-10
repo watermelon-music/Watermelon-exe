@@ -6,10 +6,10 @@
   "author": "Watermelon Music",
   "private": true,
   "scripts": {
-    "dev": "vite-node electron/main.dev.ts | vite",
     "electron:dev": "concurrently \"vite\" \"wait-on tcp:5173 && electron .\"",
-    "build": "tsc -p tsconfig.node.json && vite build && electron-builder --win",
-    "build:dir": "tsc -p tsconfig.node.json && vite build && electron-builder --win --dir",
+    "build": "vite build && electron-builder --win",
+    "build:dir": "vite build && electron-builder --win --dir",
+    "release": "vite build && electron-builder --win --publish always",
     "preview": "vite preview"
   },
   "dependencies": {
