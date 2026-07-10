@@ -1,149 +1,132 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { api, Song } from '../lib/api'
 import { usePlayerStore } from '../lib/store'
-import { Play, Loader2, Radio as RadioIcon, Sparkles } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { SongRow } from '../components/SongRow'
+
+const PREDEFINED_STATIONS = [
+  { id: 'global-hits', name: 'Global Top Hits', desc: 'The biggest songs right now', seed: { title: 'Global Top Hits 2024', artist: 'Various Artists' } },
+  { id: 'us-pop', name: 'US Pop Radio', desc: 'Top 40 hits from the USA', seed: { title: 'US Pop Hits', artist: 'Various Artists', genre: 'Pop' } },
+  { id: 'bollywood', name: 'Bollywood Mix', desc: 'Latest Indian hits', seed: { title: 'Latest Bollywood Songs', artist: 'Various', language: 'Hindi' } },
+  { id: 'kpop', name: 'K-Pop Radio', desc: 'Trending Korean pop', seed: { title: 'Trending K-Pop', artist: 'Various', language: 'Korean' } },
+  { id: 'lofi', name: 'Lo-Fi Chill', desc: 'Relaxing beats to study to', seed: { title: 'Lofi Hip Hop Beats', artist: 'Chillhop', genre: 'Lofi' } },
+  { id: 'latino', name: 'Latino Hits', desc: 'Reggaeton & Latin Pop', seed: { title: 'Latin Pop Hits', artist: 'Various', language: 'Spanish' } },
+]
 
 export function Radio() {
   const currentSong = usePlayerStore((s) => s.currentSong)
-  const isPlaying = usePlayerStore((s) => s.isPlaying)
   const playSong = usePlayerStore((s) => s.playSong)
   
-  const [loading, setLoading] = useState(false)
+  const [loadingStation, setLoadingStation] = useState<string | null>(null)
   const [recommendations, setRecommendations] = useState<Song[]>([])
   const [error, setError] = useState('')
 
-  const handleStartRadio = async () => {
-    if (!currentSong) {
-      setError('Play a song first to start radio!')
-      return
-    }
-    
-    setLoading(true)
+  const handleStartRadio = async (seedInfo: { title: string, artist: string, language?: string, genre?: string }, stationId: string) => {
+    setLoadingStation(stationId)
     setError('')
     try {
-      const recs = await api.recommendations({
-        title: currentSong.title,
-        artist: currentSong.artist
-      })
+      // Create a search query that will yield a good mix of songs
+      let query = `${seedInfo.title} ${seedInfo.artist}`
+      if (stationId !== 'smart') {
+         query = `${seedInfo.title} mix playlist songs`
+      } else {
+         query = `${seedInfo.title} ${seedInfo.artist} similar songs radio mix`
+      }
+
+      const recs = await api.search(query)
       
-      if (!recs || recs.length === 0) {
-        setError('No recommendations found for this track.')
+      if (!recs || !Array.isArray(recs) || recs.length === 0) {
+        setError('No recommendations found for this station.')
       } else {
         setRecommendations(recs)
-        // Auto-play the first recommendation and queue the rest
         playSong(recs[0], recs)
       }
     } catch (err) {
       console.error(err)
-      setError('Failed to generate radio station. Ensure AI backend is connected.')
+      setError('Failed to tune into station. Ensure AI backend is connected.')
     } finally {
-      setLoading(false)
+      setLoadingStation(null)
     }
   }
 
   return (
-    <div className="flex-1 p-8 text-white overflow-y-auto pb-24 relative">
-      {/* Dynamic Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-red-900/10 via-[#080808] to-orange-900/10 -z-10" />
+    <div className="main-content">
+      <div className="page-header">
+        <h1 className="page-title">Radio Stations</h1>
+        <p className="page-sub">Endless music channels and AI-powered smart radio</p>
+      </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-4 mb-8"
-      >
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg shadow-red-500/20 relative overflow-hidden">
-          <div className="absolute inset-0 bg-white/20 blur-xl rounded-full" />
-          <RadioIcon className="w-8 h-8 text-white relative z-10" />
+      <div className="section">
+        <h2 className="section-title">Global Channels</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+          {PREDEFINED_STATIONS.map((station) => {
+            const isLoading = loadingStation === station.id
+            return (
+              <div
+                key={station.id}
+                onClick={() => !loadingStation && handleStartRadio(station.seed, station.id)}
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius)',
+                  padding: 20,
+                  cursor: loadingStation ? 'not-allowed' : 'pointer',
+                  opacity: loadingStation && !isLoading ? 0.5 : 1,
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => { if (!loadingStation) e.currentTarget.style.borderColor = 'var(--border-hover)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)' }}
+              >
+                <div style={{ fontSize: 32, marginBottom: 12 }}>
+                  {isLoading ? '⏳' : '📻'}
+                </div>
+                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{station.name}</h3>
+                <p style={{ fontSize: 13, color: 'var(--text2)' }}>{station.desc}</p>
+              </div>
+            )
+          })}
         </div>
-        <div>
-          <h1 className="text-4xl font-black tracking-tight">Smart Radio</h1>
-          <p className="text-neutral-400 mt-1">Endless music based on what you're listening to</p>
-        </div>
-      </motion.div>
+      </div>
 
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1 }}
-        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 mb-8 shadow-2xl relative overflow-hidden"
-      >
-        {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2" />
-        
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-red-400" />
-          Current Seed
-        </h2>
+      <div className="section" style={{ background: 'var(--surface)', padding: 24, borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+        <h2 className="section-title">Smart Radio (Based on current song)</h2>
         {currentSong ? (
-          <div className="flex items-center gap-4 bg-black/40 p-4 rounded-xl">
-            <img src={currentSong.thumbnail} alt={currentSong.title} className="w-16 h-16 rounded-md object-cover" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: 'var(--surface2)', padding: 16, borderRadius: 'var(--radius-sm)', marginBottom: 20 }}>
+            <img src={currentSong.thumbnail} alt={currentSong.title} style={{ width: 64, height: 64, borderRadius: 6, objectFit: 'cover' }} />
             <div>
-              <div className="font-semibold text-lg">{currentSong.title}</div>
-              <div className="text-neutral-400">{currentSong.artist}</div>
+              <div style={{ fontSize: 16, fontWeight: 600 }}>{currentSong.title}</div>
+              <div style={{ color: 'var(--text2)', fontSize: 14 }}>{currentSong.artist}</div>
             </div>
           </div>
         ) : (
-          <div className="text-neutral-400 italic">No song currently playing.</div>
+          <div style={{ color: 'var(--text3)', fontStyle: 'italic', marginBottom: 20 }}>No song currently playing.</div>
         )}
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleStartRadio}
-          disabled={loading || !currentSong}
-          className="mt-6 flex items-center gap-3 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-400 hover:to-orange-400 disabled:opacity-50 disabled:grayscale text-white px-8 py-4 rounded-full font-bold transition-all shadow-lg shadow-red-500/25"
+        <button
+          className="login-btn"
+          onClick={() => currentSong && handleStartRadio({ title: currentSong.title, artist: currentSong.artist }, 'smart')}
+          disabled={loadingStation !== null || !currentSong}
+          style={{ width: 'auto', padding: '12px 24px' }}
         >
-          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
-          {loading ? 'Tuning Station & Generating Playlist...' : 'Start Radio Station'}
-        </motion.button>
+          {loadingStation === 'smart' ? 'Tuning Station...' : 'Start Smart Radio'}
+        </button>
+      </div>
 
-        <AnimatePresence>
-          {error && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-4 text-red-400 font-medium"
-            >
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+      {error && (
+        <div style={{ color: 'var(--red)', marginBottom: 24, padding: 16, background: 'var(--red-dim)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(244,63,94,0.3)' }}>
+          {error}
+        </div>
+      )}
 
-      <AnimatePresence>
-        {recommendations.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <h2 className="text-2xl font-bold mb-4 px-2">Up Next</h2>
-            <div className="space-y-2">
-              {recommendations.map((song, i) => (
-                <motion.div 
-                  key={song.id + i} 
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
-                  onClick={() => playSong(song, recommendations)}
-                >
-                  <div className="w-8 text-center text-neutral-500 font-medium group-hover:text-white transition-colors">
-                    {i + 1}
-                  </div>
-                  <img src={song.thumbnail} alt={song.title} className="w-12 h-12 rounded-xl object-cover shadow-md" />
-                  <div>
-                    <div className="font-medium text-white group-hover:text-red-400 transition-colors">{song.title}</div>
-                    <div className="text-sm text-neutral-400">{song.artist}</div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {recommendations.length > 0 && (
+        <div className="section">
+          <h2 className="section-title">Up Next on Radio</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {recommendations.map((song) => (
+              <SongRow key={song.id} song={song} queue={recommendations} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

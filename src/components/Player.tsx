@@ -1,119 +1,121 @@
 import { useRef } from 'react'
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Repeat1, Volume2, VolumeX, Music } from 'lucide-react'
 import { usePlayerStore } from '../lib/store'
 import { playerEngine } from '../lib/player'
-import { formatSeconds } from '../lib/utils'
+
+function formatTime(seconds: number) {
+  if (isNaN(seconds) || seconds < 0) return '0:00'
+  const m = Math.floor(seconds / 60)
+  const s = Math.floor(seconds % 60)
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
 
 export function Player() {
-  const {
-    currentSong, isPlaying, isBuffering,
-    volume, isMuted, position, duration,
-    isShuffled, repeatMode,
-    pauseResume, next, prev,
-    setVolume, toggleMute, setPosition,
-    toggleShuffle, toggleRepeat,
+  const { 
+    currentSong, isPlaying, volume, isMuted, setVolume, toggleMute, 
+    pauseResume, next, prev, toggleShuffle, toggleRepeat, 
+    isShuffled, repeatMode, position, duration 
   } = usePlayerStore()
 
-  const handlePlayPause = () => {
-    if (isPlaying) playerEngine.pause()
-    else playerEngine.play()
-    pauseResume()
-  }
+  const progressRef = useRef<HTMLDivElement>(null)
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!duration) return
-    const rect = e.currentTarget.getBoundingClientRect()
-    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
-    const newPos = pct * duration
-    playerEngine.seek(newPos)
-    setPosition(newPos)
+    if (!progressRef.current || !currentSong) return
+    const rect = progressRef.current.getBoundingClientRect()
+    const pos = (e.clientX - rect.left) / rect.width
+    playerEngine.seek(pos * duration)
   }
 
-  const handleVolume = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
-    playerEngine.setVolume(pct)
-    setVolume(pct)
-  }
-
-  const handleNext = () => { next(); setTimeout(() => { const s = usePlayerStore.getState().currentSong; if (s) { playerEngine.load(s.id); playerEngine.play() } }, 50) }
-  const handlePrev = () => { prev(); setTimeout(() => { const s = usePlayerStore.getState().currentSong; if (s) { playerEngine.load(s.id); playerEngine.play() } }, 50) }
-
-  const progressPct = duration > 0 ? (position / duration) * 100 : 0
-  const volumePct = isMuted ? 0 : volume * 100
-
-  const RepeatIcon = repeatMode === 'one' ? Repeat1 : Repeat
-
-  if (!currentSong) {
-    return (
-      <div className="player">
-        <div className="player-empty" style={{ gridColumn: '1 / -1' }}>
-          <Music size={16} style={{ marginRight: 8, color: 'var(--text3)' }} />
-          Play a song to start listening
-        </div>
-      </div>
-    )
-  }
+  if (!currentSong) return null
 
   return (
-    <div className="player">
-      {/* Track info */}
-      <div className="player-track">
-        <img
-          className="player-thumb"
-          src={currentSong.thumbnail || ''}
-          alt={currentSong.title}
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-        />
-        <div className="player-info">
-          <div className="player-title">{currentSong.title}</div>
-          <div className="player-artist">{currentSong.artist}</div>
+    <footer className="fixed bottom-0 left-0 w-full z-50 h-24 bg-surface-container-low/95 backdrop-blur-lg border-t border-outline-variant shadow-2xl flex justify-between items-center px-container-padding">
+      {/* Current Song Info */}
+      <div className="flex items-center gap-4 w-1/4">
+        <div className="w-14 h-14 rounded-lg overflow-hidden shadow-md border border-outline-variant flex-shrink-0">
+          {currentSong.thumbnail ? (
+            <img className="w-full h-full object-cover" src={currentSong.thumbnail} alt="thumbnail" />
+          ) : (
+            <div className="w-full h-full bg-surface-container flex items-center justify-center">
+              <span className="material-symbols-outlined text-on-surface-variant">music_note</span>
+            </div>
+          )}
         </div>
+        <div className="flex flex-col min-w-0">
+          <span className="font-bold text-on-surface truncate">{currentSong.title}</span>
+          <span className="text-xs text-on-surface-variant truncate">{currentSong.artist}</span>
+        </div>
+        <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors ml-2">favorite</button>
       </div>
 
-      {/* Controls + progress */}
-      <div className="player-center">
-        <div className="player-controls">
-          <button className={`ctrl-btn${isShuffled ? ' active' : ''}`} onClick={toggleShuffle} title="Shuffle">
-            <Shuffle size={15} />
+      {/* Playback Controls */}
+      <div className="flex flex-col items-center gap-2 w-2/4">
+        <div className="flex items-center gap-8">
+          <button 
+            className={`material-symbols-outlined transition-colors ${isShuffled ? 'text-primary' : 'text-on-surface-variant hover:text-primary'}`}
+            onClick={toggleShuffle}
+          >
+            shuffle
           </button>
-          <button className="ctrl-btn" onClick={handlePrev} title="Previous">
-            <SkipBack size={17} />
+          <button 
+            className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+            onClick={prev}
+          >
+            skip_previous
           </button>
-          <button className="play-btn" onClick={handlePlayPause} disabled={isBuffering}>
-            {isBuffering
-              ? <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
-              : isPlaying ? <Pause size={18} /> : <Play size={18} style={{ marginLeft: 2 }} />
-            }
+          <button 
+            className="material-symbols-outlined text-primary scale-[1.75] active:scale-95 transition-transform" 
+            style={{ fontVariationSettings: '"FILL" 1' }}
+            onClick={pauseResume}
+          >
+            {isPlaying ? 'pause_circle' : 'play_circle'}
           </button>
-          <button className="ctrl-btn" onClick={handleNext} title="Next">
-            <SkipForward size={17} />
+          <button 
+            className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+            onClick={next}
+          >
+            skip_next
           </button>
-          <button className={`ctrl-btn${repeatMode !== 'off' ? ' active' : ''}`} onClick={toggleRepeat} title="Repeat">
-            <RepeatIcon size={15} />
+          <button 
+            className={`material-symbols-outlined transition-colors ${repeatMode !== 'off' ? 'text-primary' : 'text-on-surface-variant hover:text-primary'}`}
+            onClick={toggleRepeat}
+          >
+            {repeatMode === 'one' ? 'repeat_one' : 'repeat'}
           </button>
         </div>
-
-        <div className="progress-bar-wrap">
-          <span className="time-label">{formatSeconds(position)}</span>
-          <div className="progress-bar" onClick={handleSeek}>
-            <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+        
+        <div className="flex items-center gap-3 w-full max-w-lg">
+          <span className="text-[10px] text-on-surface-variant font-medium w-8 text-right">{formatTime(position)}</span>
+          <div 
+            className="flex-1 h-1 bg-surface-container-highest rounded-full relative overflow-hidden group cursor-pointer"
+            onClick={handleSeek}
+            ref={progressRef}
+          >
+            <div className="absolute h-full bg-primary" style={{ width: `${(position / duration) * 100 || 0}%` }}></div>
+            <div className="absolute h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity" style={{ width: `${(position / duration) * 100 || 0}%` }}></div>
           </div>
-          <span className="time-label" style={{ textAlign: 'right' }}>{formatSeconds(duration)}</span>
+          <span className="text-[10px] text-on-surface-variant font-medium w-8">{formatTime(duration)}</span>
         </div>
       </div>
 
-      {/* Volume */}
-      <div className="player-right">
-        <div className="volume-row">
-          <button className="ctrl-btn" onClick={() => { toggleMute(); playerEngine.setMuted(!isMuted) }}>
-            {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
+      {/* Extra Controls */}
+      <div className="flex items-center justify-end gap-6 w-1/4">
+        <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">mic_external_on</button>
+        <button className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">queue_music</button>
+        <div className="flex items-center gap-2 w-32 group">
+          <button className="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" onClick={toggleMute}>
+            {isMuted || volume === 0 ? 'volume_off' : volume < 0.5 ? 'volume_down' : 'volume_up'}
           </button>
-          <div className="volume-bar" onClick={handleVolume}>
-            <div className="volume-fill" style={{ width: `${volumePct}%` }} />
-          </div>
+          <input 
+            type="range" 
+            min="0" 
+            max="1" 
+            step="0.01" 
+            value={isMuted ? 0 : volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className="flex-1 h-1 bg-surface-container-highest rounded-full appearance-none cursor-pointer accent-primary" 
+          />
         </div>
       </div>
-    </div>
+    </footer>
   )
 }

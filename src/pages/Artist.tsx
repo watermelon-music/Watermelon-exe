@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api, Song } from '../lib/api'
 import { usePlayerStore } from '../lib/store'
-import { ArrowLeft, Play, Users } from 'lucide-react'
+import { SongRow } from '../components/SongRow'
 
 export function Artist() {
   const { id } = useParams()
@@ -10,9 +10,6 @@ export function Artist() {
   const [artist, setArtist] = useState<any>(null)
   const [songs, setSongs] = useState<Song[]>([])
   const [loading, setLoading] = useState(true)
-  const playSong = usePlayerStore((s) => s.playSong)
-  const currentSong = usePlayerStore((s) => s.currentSong)
-  const isPlaying = usePlayerStore((s) => s.isPlaying)
 
   useEffect(() => {
     if (!id) return
@@ -23,7 +20,6 @@ export function Artist() {
     ])
       .then(([aData, sData]) => {
         setArtist(aData)
-        // Map the backend song format to the expected Song type if needed
         const mappedSongs = sData.map((s: any) => ({
           ...s,
           thumbnail: s.coverUrl || s.thumbnail
@@ -35,122 +31,67 @@ export function Artist() {
 
   if (loading) {
     return (
-      <div className="flex-1 p-8 flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500" />
+      <div className="main-content loading-center">
+        <div className="spinner" />
       </div>
     )
   }
 
   if (!artist) {
     return (
-      <div className="flex-1 p-8 text-white">
-        <button onClick={() => navigate(-1)} className="mb-4 hover:text-red-400">
-          <ArrowLeft className="h-6 w-6" />
-        </button>
-        <h2 className="text-2xl font-bold">Artist not found</h2>
+      <div className="main-content empty">
+        <button className="logout-btn" onClick={() => navigate(-1)}>Go Back</button>
+        <div className="empty-text">Artist not found</div>
       </div>
     )
   }
 
-  const handlePlaySong = (song: Song, index: number) => {
-    playSong(song, songs)
-  }
-
   return (
-    <div className="flex-1 overflow-y-auto pb-24 text-white">
-      <div className="relative h-64 md:h-80 w-full">
-        {artist.bannerUrl || artist.imageUrl ? (
+    <div className="main-content">
+      <div style={{ marginBottom: 20 }}>
+        <button className="logout-btn" onClick={() => navigate(-1)} style={{ padding: '6px 12px', fontSize: 12, marginTop: 0 }}>
+          ← Back
+        </button>
+      </div>
+
+      <div className="page-header" style={{ display: 'flex', gap: 24, alignItems: 'center', marginBottom: 40 }}>
+        {artist.imageUrl ? (
           <img 
-            src={artist.bannerUrl || artist.imageUrl} 
+            src={artist.imageUrl} 
             alt={artist.name} 
-            className="absolute inset-0 w-full h-full object-cover"
+            style={{ width: 140, height: 140, borderRadius: '50%', objectFit: 'cover', border: '4px solid var(--surface)' }}
           />
         ) : (
-          <div className="absolute inset-0 w-full h-full bg-neutral-800" />
+          <div style={{ width: 140, height: 140, borderRadius: '50%', background: 'var(--surface3)' }} />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-[#080808]/60 to-transparent" />
-        
-        <div className="absolute top-6 left-6">
-          <button onClick={() => navigate(-1)} className="p-2 bg-black/40 hover:bg-black/60 rounded-full backdrop-blur-sm transition-colors">
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-        </div>
-
-        <div className="absolute bottom-6 left-6 flex items-end gap-6">
-          {artist.imageUrl && (
-            <img 
-              src={artist.imageUrl} 
-              alt={artist.name} 
-              className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-[#080808] shadow-2xl object-cover"
-            />
+        <div>
+          {artist.verified && (
+            <span className="profile-plan" style={{ marginBottom: 8 }}>Verified Artist</span>
           )}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              {artist.verified && (
-                <span className="px-2 py-0.5 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full">
-                  Verified Artist
-                </span>
-              )}
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black mb-4">{artist.name}</h1>
-            <div className="flex items-center gap-4 text-neutral-300 text-sm font-medium">
-              <span className="flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                {(artist.subscriberCount || artist.followersCount || 0).toLocaleString()} Followers
-              </span>
-              <span>•</span>
-              <span>{artist.songCount || songs.length} Songs</span>
-            </div>
-          </div>
+          <h1 className="page-title" style={{ fontSize: 48, marginBottom: 8 }}>{artist.name}</h1>
+          <p className="page-sub" style={{ fontSize: 16 }}>
+            {(artist.subscriberCount || artist.followersCount || 0).toLocaleString()} Followers • {artist.songCount || songs.length} Songs
+          </p>
         </div>
       </div>
 
-      <div className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Top Songs</h2>
-        <div className="space-y-2">
-          {songs.map((song, i) => {
-            const isActive = currentSong?.id === song.id
-            return (
-              <div
-                key={song.id}
-                onClick={() => handlePlaySong(song, i)}
-                className={`flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group ${
-                  isActive ? 'bg-white/10' : ''
-                }`}
-              >
-                <div className="w-8 text-center text-neutral-500 text-sm font-medium group-hover:hidden">
-                  {i + 1}
-                </div>
-                <div className="w-8 text-center hidden group-hover:block">
-                  <Play className="h-4 w-4 mx-auto text-white" />
-                </div>
-                <img
-                  src={song.thumbnail}
-                  alt={song.title}
-                  className="w-12 h-12 rounded object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className={`font-medium truncate ${isActive ? 'text-red-400' : 'text-white'}`}>
-                    {song.title}
-                  </div>
-                  <div className="text-sm text-neutral-400 truncate">
-                    {song.artist}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+      <div className="section">
+        <h2 className="section-title">Top Songs</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {songs.map((song) => (
+            <SongRow key={song.id} song={song} queue={songs} />
+          ))}
         </div>
-        
-        {artist.bio && (
-          <div className="mt-12 max-w-3xl">
-            <h2 className="text-2xl font-bold mb-4">About</h2>
-            <p className="text-neutral-400 leading-relaxed whitespace-pre-line">
-              {artist.bio}
-            </p>
-          </div>
-        )}
       </div>
+      
+      {artist.bio && (
+        <div className="section" style={{ marginTop: 40 }}>
+          <h2 className="section-title">About</h2>
+          <p style={{ color: 'var(--text2)', lineHeight: 1.6, whiteSpace: 'pre-line', maxWidth: 800, fontSize: 14 }}>
+            {artist.bio}
+          </p>
+        </div>
+      )}
     </div>
   )
 }

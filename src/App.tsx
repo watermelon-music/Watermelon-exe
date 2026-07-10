@@ -6,6 +6,7 @@ import { playerEngine } from './lib/player'
 
 import { Titlebar } from './components/Titlebar'
 import { Sidebar } from './components/Sidebar'
+import { Header } from './components/Header'
 import { Player } from './components/Player'
 
 import { Login } from './pages/Login'
@@ -86,20 +87,25 @@ export default function App() {
 
   return (
     <HashRouter>
-      <div className="app-shell">
+      <div className="min-h-screen bg-surface-container-lowest text-on-surface font-body-md selection:bg-primary-container selection:text-white antialiased">
         <Titlebar />
         <Sidebar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/premium" element={<Premium />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/artist/:id" element={<Artist />} />
-          <Route path="/radio" element={<Radio />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Header />
+        
+        {/* The main content area leaves room for sidebar, header, and player */}
+        <div className="ml-64 pt-24 pb-24">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/library" element={<Library />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/premium" element={<Premium />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/artist/:id" element={<Artist />} />
+            <Route path="/radio" element={<Radio />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
         <Player />
       </div>
     </HashRouter>
