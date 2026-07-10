@@ -1,6 +1,6 @@
 {
   "name": "watermelon",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Watermelon Music — Windows Desktop App",
   "main": "dist-electron/main.js",
   "author": "Watermelon Music",
@@ -26,7 +26,6 @@
   "devDependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.11",
-    "@tailwindcss/postcss": "^4.3.2",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
@@ -35,7 +34,7 @@
     "electron": "^32.0.0",
     "electron-builder": "^24.13.3",
     "postcss": "^8.5.16",
-    "tailwindcss": "^4.3.2",
+    "tailwindcss": "^3.4.19",
     "typescript": "^5.5.0",
     "vite": "^5.4.0",
     "vite-plugin-electron": "^0.28.7",

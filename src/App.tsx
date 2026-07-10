@@ -87,13 +87,13 @@ export default function App() {
 
   return (
     <HashRouter>
-      <div className="min-h-screen bg-surface-container-lowest text-on-surface font-body-md selection:bg-primary-container selection:text-white antialiased">
+      <div className="min-h-screen bg-[#0a0a0a] text-white font-body-md selection:bg-[#ff3b3b] selection:text-white antialiased">
         <Titlebar />
         <Sidebar />
         <Header />
         
         {/* The main content area leaves room for sidebar, header, and player */}
-        <div className="ml-64 pt-24 pb-24">
+        <div className="ml-60 pt-20 pb-24">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<Search />} />

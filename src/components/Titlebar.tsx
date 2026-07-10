@@ -11,13 +11,13 @@ export function Titlebar() {
   }
 
   return (
-    <div className="titlebar">
-      <div className="titlebar-logo">
+    <div className="titlebar fixed top-0 left-0 w-full z-[100] bg-surface-container-lowest/50 backdrop-blur-sm pointer-events-none">
+      <div className="titlebar-logo pointer-events-auto">
         <span className="titlebar-icon">🍉</span>
         <span className="titlebar-name">Watermelon</span>
       </div>
       <div className="titlebar-drag" />
-      <div className="titlebar-controls">
+      <div className="titlebar-controls pointer-events-auto">
         <button className="titlebar-btn" onClick={() => window.electron?.window.minimize()}>
           <Minus size={12} />
         </button>
