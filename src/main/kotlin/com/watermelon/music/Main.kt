@@ -28,11 +28,12 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 
+import androidx.compose.ui.input.key.*
+
 @Composable
 @Preview
-fun App() {
+fun App(playerViewModel: PlayerViewModel) {
     val navController = remember { NavController(Screen.Home) }
-    val playerViewModel = remember { PlayerViewModel() }
 
     MaterialTheme {
         Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
@@ -85,11 +86,34 @@ fun main() = application {
             }
             .build()
     }
+    
+    val playerViewModel = remember { PlayerViewModel() }
 
     Window(
         onCloseRequest = ::exitApplication,
         title = "Watermelon",
+        onPreviewKeyEvent = { event ->
+            if (event.type == KeyEventType.KeyDown) {
+                when (event.key) {
+                    Key.Spacebar -> {
+                        playerViewModel.togglePlayPause()
+                        true
+                    }
+                    Key.DirectionUp -> {
+                        playerViewModel.setVolume(playerViewModel.volume.value + 0.1f)
+                        true
+                    }
+                    Key.DirectionDown -> {
+                        playerViewModel.setVolume(playerViewModel.volume.value - 0.1f)
+                        true
+                    }
+                    else -> false
+                }
+            } else {
+                false
+            }
+        }
     ) {
-        App()
+        App(playerViewModel)
     }
 }

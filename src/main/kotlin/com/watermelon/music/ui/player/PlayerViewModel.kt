@@ -18,6 +18,7 @@ class PlayerViewModel {
     val currentSong = AudioPlayer.currentSong
     val isPlaying = AudioPlayer.isPlaying
     val progress = AudioPlayer.progress
+    val volume = AudioPlayer.volume
     
     val library = com.watermelon.music.data.LibraryEngine.library
 
@@ -52,5 +53,9 @@ class PlayerViewModel {
 
     fun togglePlayPause() {
         AudioPlayer.togglePlayPause()
+    }
+    
+    fun setVolume(vol: Float) {
+        AudioPlayer.setVolume(vol)
     }
 }

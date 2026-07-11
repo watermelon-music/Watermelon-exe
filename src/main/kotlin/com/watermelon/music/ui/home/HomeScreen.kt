@@ -154,12 +154,11 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
                             
-                            FlowRow(
+                            LazyRow(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                viewModel.topHits.forEach { song ->
+                                items(viewModel.topHits) { song ->
                                     ModernSongCard(song) {
                                         playerViewModel?.playSong(song)
                                     }
@@ -360,12 +359,11 @@ fun SongCategoryRow(category: String, songs: List<Song>, playerViewModel: Player
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        FlowRow(
+        LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            songs.forEach { song ->
+            items(songs) { song ->
                 ModernSongCard(song) {
                     playerViewModel?.playSong(song)
                 }

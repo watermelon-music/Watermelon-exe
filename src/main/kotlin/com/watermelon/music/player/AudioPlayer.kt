@@ -19,6 +19,9 @@ object AudioPlayer {
     private val _progress = MutableStateFlow(0f)
     val progress: StateFlow<Float> = _progress.asStateFlow()
 
+    private val _volume = MutableStateFlow(1f)
+    val volume: StateFlow<Float> = _volume.asStateFlow()
+
     // Initialize JavaFX toolkit without launching an application
     init {
         try {
@@ -41,6 +44,7 @@ object AudioPlayer {
             }
             
             mediaPlayer = MediaPlayer(media).apply {
+                volume = _volume.value.toDouble()
                 setOnError {
                     println("🍉 MediaPlayer Error: ${error?.message}")
                 }
@@ -88,5 +92,11 @@ object AudioPlayer {
                 player.seek(javafx.util.Duration(total * fraction))
             }
         }
+    }
+    
+    fun setVolume(volume: Float) {
+        val clamped = volume.coerceIn(0f, 1f)
+        _volume.value = clamped
+        mediaPlayer?.volume = clamped.toDouble()
     }
 }
