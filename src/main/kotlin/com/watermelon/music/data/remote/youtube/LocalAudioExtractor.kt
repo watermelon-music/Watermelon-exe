@@ -18,14 +18,6 @@ object LocalAudioExtractor {
         if (!isNewPipeInitialized) {
             val downloader = YouTubeDownloader(client)
             NewPipe.init(downloader, Localization.DEFAULT, ContentCountry("US"))
-            try {
-                val clazz = Class.forName("org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeStreamExtractor")
-                val field = clazz.getDeclaredField("fetchIosClient")
-                field.isAccessible = true
-                field.setBoolean(null, true)
-            } catch (e: Exception) {
-                // Ignore
-            }
             isNewPipeInitialized = true
         }
     }
