@@ -22,7 +22,6 @@ object AudioPlayer {
     // Initialize JavaFX toolkit without launching an application
     init {
         try {
-            LocalProxyServer.start()
             System.setProperty("http.agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
             com.sun.javafx.application.PlatformImpl.startup {}
         } catch (e: Exception) {
@@ -35,11 +34,8 @@ object AudioPlayer {
         mediaPlayer?.dispose()
 
         try {
-            val encodedUrl = java.net.URLEncoder.encode(audioUrl, "UTF-8")
-            val proxiedUrl = "http://127.0.0.1:${LocalProxyServer.port}/stream?url=$encodedUrl"
-            
-            println("🍉 Playing proxied URL: $proxiedUrl")
-            val media = Media(proxiedUrl)
+            println("🍉 Playing direct URL: $audioUrl")
+            val media = Media(audioUrl)
             media.onError = Runnable {
                 println("🍉 Media Error: ${media.error?.message}")
             }
