@@ -48,6 +48,9 @@ dependencies {
     
     // NewPipe Extraction
     implementation("com.github.TeamNewPipe:NewPipeExtractor:v0.26.2")
+    
+    // JSON
+    implementation("org.json:json:20231013")
 }
 
 compose.desktop {

@@ -28,21 +28,11 @@ class PlayerViewModel {
         scope.launch {
             _isLoading.value = true
             
-            val audioUrl = withContext(Dispatchers.IO) {
-                try {
-                    val extractor = ServiceList.YouTube.getStreamExtractor("https://www.youtube.com/watch?v=${song.id}")
-                    extractor.fetchPage()
-                    
-                    // Prefer M4A for JavaFX Media compatibility
-                    val audioStreams = extractor.audioStreams
-                    val m4aStream = audioStreams.find { it.format?.name?.contains("M4A", ignoreCase = true) == true }
-                    val fallbackStream = audioStreams.firstOrNull()
-                    
-                    m4aStream?.content ?: fallbackStream?.content
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
+            val audioUrl = try {
+                com.watermelon.music.data.remote.youtube.LocalAudioExtractor.extractAudioUrl(song.id)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
             }
 
             _isLoading.value = false

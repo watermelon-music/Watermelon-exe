@@ -19,6 +19,8 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -166,6 +168,28 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
 
 @Composable
 fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
+    val carouselSongs = viewModel.topHits.take(5)
+    if (carouselSongs.isEmpty()) {
+        // Fallback static banner if no songs are loaded
+        Box(
+            modifier = Modifier.fillMaxWidth().height(300.dp).clip(RoundedCornerShape(16.dp)).background(Color.DarkGray)
+        )
+        return
+    }
+
+    var currentIndex by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(0) }
+    
+    androidx.compose.runtime.LaunchedEffect(carouselSongs) {
+        while (true) {
+            kotlinx.coroutines.delay(3000)
+            if (carouselSongs.isNotEmpty()) {
+                currentIndex = (currentIndex + 1) % carouselSongs.size
+            }
+        }
+    }
+
+    val currentSong = carouselSongs.getOrNull(currentIndex) ?: return
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -175,13 +199,13 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
     ) {
         // Background Image
         AsyncImage(
-            model = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
+            model = currentSong.thumbnail,
             contentDescription = "Concert",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
         // Dark Overlay
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)))
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.7f)))
         
         // Content
         Column(
@@ -200,14 +224,16 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Electronic Pulse",
+                text = currentSong.title,
                 color = Color.White,
                 fontSize = 42.sp,
-                fontWeight = FontWeight.ExtraBold
+                fontWeight = FontWeight.ExtraBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Experience the rhythm of the future with our curated high-\nfidelity synthwave collection.",
+                text = "Experience the newest from ${currentSong.artist}!",
                 color = Color.LightGray,
                 fontSize = 14.sp,
                 lineHeight = 20.sp
@@ -220,9 +246,7 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
                         .clip(RoundedCornerShape(24.dp))
                         .background(Color(0xFFFF4040))
                         .clickable {
-                            if (viewModel.topHits.isNotEmpty()) {
-                                playerViewModel?.playSong(viewModel.topHits.first())
-                            }
+                            playerViewModel?.playSong(currentSong)
                         }
                         .padding(horizontal = 24.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
