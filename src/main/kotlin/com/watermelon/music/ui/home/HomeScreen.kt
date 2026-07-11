@@ -72,7 +72,7 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                     Text(
                         text = "Watermelon",
                         color = Color(0xFFFF4040), // Dark Red/Watermelon color
-                        fontSize = 28.sp,
+                        fontSize = 36.sp, // Made much bigger
                         fontWeight = FontWeight.ExtraBold
                     )
                     
@@ -106,39 +106,10 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                         HeroBanner(viewModel, playerViewModel)
                     }
 
-                    // RECOMMENDED ROW
-                    if (viewModel.topHits.isNotEmpty()) {
-                        item {
-                            Spacer(modifier = Modifier.height(32.dp))
-                            Text(
-                                text = "Recommended for You",
-                                color = Color.White,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "Based on your recent listening history",
-                                color = Color.Gray,
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
-                            
-                            LazyRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                items(viewModel.topHits) { song ->
-                                    ModernSongCard(song) {
-                                        playerViewModel?.playSong(song)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Sequential Categories
+                    // No Recommended Row anymore, jump straight to Categories
+                    
                     item {
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                     items(com.watermelon.music.domain.model.HOME_CATEGORIES) { category ->
                         val songs = viewModel.categories[category.id]
@@ -301,6 +272,6 @@ fun SongCategoryRow(category: String, songs: List<Song>, playerViewModel: Player
                 }
             }
         }
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
