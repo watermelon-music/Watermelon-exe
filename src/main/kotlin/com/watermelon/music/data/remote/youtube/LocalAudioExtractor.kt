@@ -24,34 +24,43 @@ object LocalAudioExtractor {
 
     suspend fun extractAudioUrl(videoId: String): String? = withContext(Dispatchers.IO) {
         try {
+            val tmpDir = System.getProperty("java.io.tmpdir")
+            val targetFile = java.io.File(tmpDir, "watermelon_$videoId.m4a")
+            
+            // If already downloaded, return immediately (Caching)
+            if (targetFile.exists() && targetFile.length() > 0) {
+                println("🍉 Found cached audio file: ${targetFile.absolutePath}")
+                return@withContext targetFile.toURI().toString()
+            }
+            
             val url = "https://www.youtube.com/watch?v=$videoId"
-            // Use yt-dlp to extract the direct audio stream URL
+            // Use yt-dlp to completely download the M4A file
             val processBuilder = ProcessBuilder(
                 "yt-dlp",
-                "-g",
                 "-f",
                 "bestaudio[ext=m4a]",
+                "-o",
+                targetFile.absolutePath,
                 "--no-update",
                 "--no-warnings",
                 url
             )
             
             val process = processBuilder.start()
+            // We must read output or it hangs on Windows
             val reader = BufferedReader(InputStreamReader(process.inputStream))
-            val output = StringBuilder()
             var line: String?
             while (reader.readLine().also { line = it } != null) {
-                output.append(line)
+                println("yt-dlp: $line")
             }
             process.waitFor()
             
-            val streamUrl = output.toString().trim()
-            if (streamUrl.isNotBlank() && streamUrl.startsWith("http")) {
-                println("🍉 yt-dlp Extraction Success!")
-                return@withContext streamUrl
+            if (targetFile.exists() && targetFile.length() > 0) {
+                println("🍉 yt-dlp Download Success: ${targetFile.absolutePath}")
+                return@withContext targetFile.toURI().toString()
             }
         } catch (e: Exception) {
-            println("🍉 yt-dlp Extraction Failed: ${e.message}")
+            println("🍉 yt-dlp Download Failed: ${e.message}")
             e.printStackTrace()
         }
         
