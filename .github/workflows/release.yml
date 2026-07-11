@@ -53,8 +53,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: output/*.exe
-          tag_name: latest
-          name: Latest Release
+          tag_name: v1.0.${{ github.run_number }}
+          name: Release v1.0.${{ github.run_number }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
