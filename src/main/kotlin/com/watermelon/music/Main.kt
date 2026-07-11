@@ -4,12 +4,12 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Window
@@ -17,8 +17,9 @@ import androidx.compose.ui.window.application
 import com.watermelon.music.navigation.NavController
 import com.watermelon.music.navigation.Screen
 import com.watermelon.music.ui.auth.LoginScreen
+import com.watermelon.music.ui.components.Sidebar
 import com.watermelon.music.ui.home.HomeScreen
-import com.watermelon.music.ui.player.MiniPlayer
+import com.watermelon.music.ui.player.BottomPlayer
 import com.watermelon.music.ui.player.PlayerViewModel
 import com.watermelon.music.ui.profile.ProfileScreen
 import com.watermelon.music.ui.library.LibraryScreen
@@ -34,33 +35,44 @@ fun App() {
     val playerViewModel = remember { PlayerViewModel() }
 
     MaterialTheme {
-        Column(modifier = Modifier.fillMaxSize().background(Color(0xFF080808))) {
-            Box(modifier = Modifier.weight(1f)) {
-                when (navController.currentScreen) {
-                    is Screen.Splash -> {
-                        // Splash UI
+        Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
+            // Main content area with Sidebar
+            Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                // Only show Sidebar if not Splash or Login
+                if (navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
+                    Sidebar(navController)
+                }
+
+                // Dynamic Screen Content
+                Box(modifier = Modifier.weight(1f).fillMaxSize()) {
+                    when (navController.currentScreen) {
+                        is Screen.Splash -> {
+                            // Splash UI
+                        }
+                        is Screen.Login -> {
+                            LoginScreen(navController)
+                        }
+                        is Screen.Home -> {
+                            HomeScreen(navController, playerViewModel)
+                        }
+                        is Screen.Profile -> {
+                            ProfileScreen()
+                        }
+                        is Screen.Library -> {
+                            LibraryScreen(playerViewModel)
+                        }
+                        is Screen.Radio -> {
+                            RadioScreen(playerViewModel)
+                        }
+                        else -> {}
                     }
-                    is Screen.Login -> {
-                        LoginScreen(navController)
-                    }
-                    is Screen.Home -> {
-                        HomeScreen(navController, playerViewModel)
-                    }
-                    is Screen.Profile -> {
-                        ProfileScreen()
-                    }
-                    is Screen.Library -> {
-                        LibraryScreen(playerViewModel)
-                    }
-                    is Screen.Radio -> {
-                        RadioScreen(playerViewModel)
-                    }
-                    else -> {}
                 }
             }
             
-            // Bottom Mini Player
-            MiniPlayer(playerViewModel)
+            // Bottom Player (spans full width)
+            if (navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
+                BottomPlayer(playerViewModel)
+            }
         }
     }
 }
