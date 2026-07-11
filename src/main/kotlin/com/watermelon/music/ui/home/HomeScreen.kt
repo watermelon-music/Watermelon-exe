@@ -38,6 +38,7 @@ import com.watermelon.music.navigation.NavController
 import com.watermelon.music.navigation.Screen
 import com.watermelon.music.ui.player.PlayerViewModel
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? = null) {
     val viewModel = remember { HomeViewModel() }
