@@ -1,7 +1,13 @@
-node_modules
-dist
-dist-electron
-release
-.env
-*.log
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDEA
+.idea/
+*.iml
+*.iws
+
+# OS files
 .DS_Store
+Thumbs.db

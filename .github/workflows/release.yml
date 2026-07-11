@@ -1,0 +1,58 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*' # Trigger on version tags (e.g., v1.0.0)
+  workflow_dispatch: # Allow manual triggers
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: 'gradle'
+
+      - name: Make gradlew executable
+        run: git update-index --chmod=+x gradlew
+        continue-on-error: true
+
+      - name: Build Windows Executable
+        run: .\gradlew packageExe --no-daemon
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Watermelon-Windows-Executable
+          path: build/compose/binaries/main/exe/*.exe
+
+  release:
+    needs: build-windows
+    runs-on: ubuntu-latest
+    # Only create a release if a tag was pushed, or if triggered manually.
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Watermelon-Windows-Executable
+          path: output/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: output/*.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
