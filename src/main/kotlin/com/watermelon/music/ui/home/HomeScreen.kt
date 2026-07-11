@@ -3,6 +3,8 @@ package com.watermelon.music.ui.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -136,8 +138,12 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
                             
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                items(viewModel.topHits) { song ->
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                viewModel.topHits.forEach { song ->
                                     ModernSongCard(song) {
                                         playerViewModel?.playSong(song)
                                     }
@@ -311,9 +317,10 @@ fun ModernSongCard(song: Song, onClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SongCategoryRow(category: String, songs: List<Song>, playerViewModel: PlayerViewModel?) {
-    Column {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = category,
             color = Color.White,
@@ -321,8 +328,12 @@ fun SongCategoryRow(category: String, songs: List<Song>, playerViewModel: Player
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(songs) { song ->
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            songs.forEach { song ->
                 ModernSongCard(song) {
                     playerViewModel?.playSong(song)
                 }

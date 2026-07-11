@@ -39,6 +39,8 @@ jobs:
   release:
     needs: build-windows
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
       - name: Download Artifacts

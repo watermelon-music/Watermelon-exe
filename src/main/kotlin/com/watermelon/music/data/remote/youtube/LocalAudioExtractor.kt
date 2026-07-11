@@ -2,136 +2,54 @@ package com.watermelon.music.data.remote.youtube
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import org.schabi.newpipe.extractor.ServiceList
-import java.util.regex.Pattern
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 object LocalAudioExtractor {
-    private val client = OkHttpClient()
 
     suspend fun extractAudioUrl(videoId: String): String? = withContext(Dispatchers.IO) {
-        // Algorithm 1: Direct InnerTube API (Fastest, no HTML parsing)
         try {
-            val innerTubeUrl = tryInnerTubeApi(videoId)
-            if (innerTubeUrl != null) {
-                println("🍉 Algorithm 1 (InnerTube) Success!")
-                return@withContext innerTubeUrl
-            }
-        } catch (e: Exception) {
-            println("🍉 Algorithm 1 Failed: ${e.message}")
-        }
+            val url = "https://www.youtube.com/watch?v=$videoId"
+            // Use yt-dlp to get the direct audio stream URL. 
+            // We request the best audio format that is m4a or webm. 
+            // JavaFX primarily supports m4a (AAC) or mp3, so we prioritize m4a.
+            val process = ProcessBuilder(
+                "yt-dlp",
+                "-g",
+                "-f",
+                "bestaudio[ext=m4a]/bestaudio[ext=mp3]/bestaudio",
+                "--no-check-certificate",
+                "--no-warnings",
+                url
+            )
+            .redirectErrorStream(true)
+            .start()
 
-        // Algorithm 2: HTML Regex Scraper (Fast, bypasses NewPipe's heavy parsing)
-        try {
-            val htmlUrl = tryHtmlRegexScrape(videoId)
-            if (htmlUrl != null) {
-                println("🍉 Algorithm 2 (Regex) Success!")
-                return@withContext htmlUrl
-            }
-        } catch (e: Exception) {
-            println("🍉 Algorithm 2 Failed: ${e.message}")
-        }
+            val reader = BufferedReader(InputStreamReader(process.inputStream))
+            var directUrl: String? = null
+            var line: String?
 
-        // Algorithm 3: NewPipe Extractor (Thorough but sometimes slower/blocked)
-        try {
-            val newpipeUrl = tryNewPipeExtractor(videoId)
-            if (newpipeUrl != null) {
-                println("🍉 Algorithm 3 (NewPipe) Success!")
-                return@withContext newpipeUrl
-            }
-        } catch (e: Exception) {
-            println("🍉 Algorithm 3 Failed: ${e.message}")
-        }
-
-        null
-    }
-
-    private fun tryInnerTubeApi(videoId: String): String? {
-        val jsonPayload = """
-            {
-                "context": {
-                    "client": {
-                        "hl": "en",
-                        "clientName": "WEB",
-                        "clientVersion": "2.20210721.00.00",
-                        "clientFormFactor": "UNKNOWN_FORM_FACTOR",
-                        "clientScreen": "WATCH"
-                    }
-                },
-                "videoId": "$videoId",
-                "playbackContext": {
-                    "contentPlaybackContext": {
-                        "signatureTimestamp": 19000
-                    }
+            while (reader.readLine().also { line = it } != null) {
+                // The first valid https:// URL returned is the stream URL
+                if (line?.startsWith("https://") == true) {
+                    directUrl = line
+                    break
                 }
             }
-        """.trimIndent()
 
-        val request = Request.Builder()
-            .url("https://www.youtube.com/youtubei/v1/player")
-            .post(jsonPayload.toRequestBody("application/json".toMediaType()))
-            .build()
-
-        val response = client.newCall(request).execute()
-        val jsonString = response.body?.string() ?: return null
-        
-        val json = JSONObject(jsonString)
-        val streamingData = json.optJSONObject("streamingData") ?: return null
-        val adaptiveFormats = streamingData.optJSONArray("adaptiveFormats") ?: return null
-
-        for (i in 0 until adaptiveFormats.length()) {
-            val format = adaptiveFormats.getJSONObject(i)
-            val mimeType = format.optString("mimeType", "")
-            // We specifically want MP4/M4A audio for JavaFX
-            if (mimeType.contains("audio/mp4")) {
-                val url = format.optString("url")
-                if (url.isNotEmpty()) return url
-            }
-        }
-        return null
-    }
-
-    private fun tryHtmlRegexScrape(videoId: String): String? {
-        val request = Request.Builder()
-            .url("https://www.youtube.com/watch?v=$videoId")
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-            .build()
-
-        val response = client.newCall(request).execute()
-        val html = response.body?.string() ?: return null
-
-        val pattern = Pattern.compile("ytInitialPlayerResponse\\s*=\\s*(\\{.+?\\});")
-        val matcher = pattern.matcher(html)
-        
-        if (matcher.find()) {
-            val jsonString = matcher.group(1)
-            val json = JSONObject(jsonString)
-            val streamingData = json.optJSONObject("streamingData") ?: return null
-            val adaptiveFormats = streamingData.optJSONArray("adaptiveFormats") ?: return null
+            process.waitFor()
             
-            for (i in 0 until adaptiveFormats.length()) {
-                val format = adaptiveFormats.getJSONObject(i)
-                val mimeType = format.optString("mimeType", "")
-                if (mimeType.contains("audio/mp4")) {
-                    val url = format.optString("url")
-                    if (url.isNotEmpty()) return url
-                }
+            if (directUrl != null) {
+                println("🍉 yt-dlp Extraction Success!")
+                return@withContext directUrl
             }
+            
+            println("🍉 yt-dlp Extraction Failed: No URL returned")
+            null
+        } catch (e: Exception) {
+            println("🍉 yt-dlp Extraction Failed: ${e.message}")
+            e.printStackTrace()
+            null
         }
-        return null
-    }
-
-    private fun tryNewPipeExtractor(videoId: String): String? {
-        val extractor = ServiceList.YouTube.getStreamExtractor("https://www.youtube.com/watch?v=$videoId")
-        extractor.fetchPage()
-        
-        val audioStreams = extractor.audioStreams
-        // Must enforce M4A for JavaFX!
-        val m4aStream = audioStreams.find { it.format?.name?.contains("M4A", ignoreCase = true) == true }
-        return m4aStream?.content
     }
 }
