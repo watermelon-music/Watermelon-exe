@@ -36,16 +36,7 @@ class MusicCatalogRepository {
                 url.replace(Regex("=[sw]\\d+.*"), "=s720")
             url.contains("ytimg.com") -> {
                 if (videoId != null) {
-                    val maxResUrl = "https://i.ytimg.com/vi/$videoId/maxresdefault.jpg"
-                    // Check if maxresdefault exists using OkHttp
-                    try {
-                        val client = okhttp3.OkHttpClient()
-                        val request = okhttp3.Request.Builder().url(maxResUrl).head().build()
-                        val response = client.newCall(request).execute()
-                        if (response.isSuccessful) maxResUrl else "https://i.ytimg.com/vi/$videoId/hqdefault.jpg"
-                    } catch (e: Exception) {
-                        "https://i.ytimg.com/vi/$videoId/hqdefault.jpg"
-                    }
+                    "https://i.ytimg.com/vi/$videoId/hqdefault.jpg"
                 } else {
                     url.replace(Regex("(mqdefault|hqdefault|sddefault|default)"), "hqdefault")
                 }

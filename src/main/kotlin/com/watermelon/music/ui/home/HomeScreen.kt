@@ -143,6 +143,21 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                             }
                         }
                     }
+
+                    // Sequential Categories
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+                    items(com.watermelon.music.domain.model.HOME_CATEGORIES) { category ->
+                        val songs = viewModel.categories[category.id]
+                        if (!songs.isNullOrEmpty()) {
+                            SongCategoryRow(
+                                category = category.title,
+                                songs = songs,
+                                playerViewModel = playerViewModel
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -269,5 +284,26 @@ fun ModernSongCard(song: Song, onClick: () -> Unit) {
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(top = 2.dp)
         )
+    }
+}
+
+@Composable
+fun SongCategoryRow(category: String, songs: List<Song>, playerViewModel: PlayerViewModel?) {
+    Column {
+        Text(
+            text = category,
+            color = Color.White,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            items(songs) { song ->
+                ModernSongCard(song) {
+                    playerViewModel?.playSong(song)
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
