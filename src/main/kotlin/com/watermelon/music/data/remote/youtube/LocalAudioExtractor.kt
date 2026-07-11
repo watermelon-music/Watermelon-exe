@@ -27,6 +27,19 @@ object LocalAudioExtractor {
             val tmpDir = System.getProperty("java.io.tmpdir")
             val targetFile = java.io.File(tmpDir, "watermelon_$videoId.m4a")
             
+            // Clean up old watermelon audio files to save storage space
+            val tmpDirFile = java.io.File(tmpDir)
+            tmpDirFile.listFiles { file -> 
+                file.name.startsWith("watermelon_") && file.name.endsWith(".m4a") && file.name != targetFile.name
+            }?.forEach { oldFile ->
+                try {
+                    oldFile.delete()
+                    println("🍉 Deleted old temporary audio file: ${oldFile.name}")
+                } catch (e: Exception) {
+                    // Ignore deletion errors
+                }
+            }
+            
             // If already downloaded, return immediately (Caching)
             if (targetFile.exists() && targetFile.length() > 0) {
                 println("🍉 Found cached audio file: ${targetFile.absolutePath}")

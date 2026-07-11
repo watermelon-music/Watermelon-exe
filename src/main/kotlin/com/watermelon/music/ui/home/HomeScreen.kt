@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -27,7 +28,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.animation.core.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -88,6 +92,17 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                         contentDescription = "Notifications",
                         tint = Color.White,
                         modifier = Modifier.size(24.dp)
+                    )
+                    
+                    Spacer(modifier = Modifier.width(20.dp))
+                    
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Refresh",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { viewModel.loadData() }
                     )
                     
                     Spacer(modifier = Modifier.width(24.dp))
@@ -197,6 +212,16 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
 
     val currentSong = carouselSongs.getOrNull(currentIndex) ?: return
 
+    val infiniteTransition = rememberInfiniteTransition()
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.12f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(12000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -204,15 +229,21 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
             .clip(RoundedCornerShape(16.dp))
             .background(Color.DarkGray)
     ) {
-        // Background Image
+        // Background Image with Cinematic Pan/Zoom (looks like a video)
         AsyncImage(
             model = currentSong.thumbnail,
             contentDescription = "Concert",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().graphicsLayer(scaleX = scale, scaleY = scale)
         )
-        // Dark Overlay
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.7f)))
+        // Cinematic Gradient Overlay
+        Box(modifier = Modifier.fillMaxSize().background(
+            Brush.verticalGradient(
+                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.9f)),
+                startY = 0f,
+                endY = Float.POSITIVE_INFINITY
+            )
+        ))
         
         // Content
         Column(
