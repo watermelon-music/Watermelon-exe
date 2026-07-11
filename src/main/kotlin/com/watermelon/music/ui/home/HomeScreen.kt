@@ -65,47 +65,16 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                 // TOP BAR
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Search Bar
-                    TextField(
-                        value = "",
-                        onValueChange = {},
-                        placeholder = { Text("Search artists, songs...", color = Color.Gray) },
-                        leadingIcon = { Icon(Icons.Default.Search, tint = Color.Gray, contentDescription = null) },
-                        colors = TextFieldDefaults.textFieldColors(
-                            backgroundColor = Color(0xFF1E1E1E),
-                            textColor = Color.White,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(24.dp),
-                        modifier = Modifier.width(300.dp).height(48.dp)
+                    // Logo Text
+                    Text(
+                        text = "Watermelon",
+                        color = Color(0xFFFF4040), // Dark Red/Watermelon color
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.ExtraBold
                     )
-                    
-                    Spacer(modifier = Modifier.weight(1f))
-                    
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    
-                    Spacer(modifier = Modifier.width(20.dp))
-                    
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable { viewModel.loadData() }
-                    )
-                    
-                    Spacer(modifier = Modifier.width(24.dp))
                     
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -211,38 +180,22 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
 
     val currentSong = carouselSongs.getOrNull(currentIndex) ?: return
 
-    val infiniteTransition = rememberInfiniteTransition()
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.12f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(12000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.DarkGray)
+            .background(Color(0xFF1E1E1E))
     ) {
-        // Background Image with Cinematic Pan/Zoom (looks like a video)
+        // Background Image
         AsyncImage(
             model = currentSong.thumbnail,
             contentDescription = "Concert",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().graphicsLayer(scaleX = scale, scaleY = scale)
+            modifier = Modifier.fillMaxSize()
         )
-        // Cinematic Gradient Overlay
-        Box(modifier = Modifier.fillMaxSize().background(
-            Brush.verticalGradient(
-                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.9f)),
-                startY = 0f,
-                endY = Float.POSITIVE_INFINITY
-            )
-        ))
+        // Dark Overlay for readability
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.6f)))
         
         // Content
         Column(
@@ -251,15 +204,6 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
                 .padding(32.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White)
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-            ) {
-                Text("NEW RELEASE", color = Color.Black, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-            }
-            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = currentSong.title,
                 color = Color.White,
@@ -276,33 +220,21 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
                 lineHeight = 20.sp
             )
             Spacer(modifier = Modifier.height(24.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                // Play Now Button
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFFFF4040))
-                        .clickable {
-                            playerViewModel?.playSong(currentSong)
-                        }
-                        .padding(horizontal = 24.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Play Now", color = Color.White, fontWeight = FontWeight.Bold)
-                }
-
-                // Save Playlist Button
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFF2A2A2A))
-                        .clickable { /* Save Playlist */ }
-                        .padding(horizontal = 24.dp, vertical = 12.dp)
-                ) {
-                    Text("Save Playlist", color = Color.White, fontWeight = FontWeight.Bold)
-                }
+            
+            // Play Now Button
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color(0xFFFF4040))
+                    .clickable {
+                        playerViewModel?.playSong(currentSong)
+                    }
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Play Now", color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
     }

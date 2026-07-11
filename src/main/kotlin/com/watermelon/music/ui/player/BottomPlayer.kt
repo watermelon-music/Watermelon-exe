@@ -24,12 +24,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.watermelon.music.domain.model.Song
 
 @Composable
 fun BottomPlayer(viewModel: PlayerViewModel) {
     val currentSong by viewModel.currentSong.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
     val progress by viewModel.progress.collectAsState()
+    val volume by viewModel.volume.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val library by viewModel.library.collectAsState()
 
@@ -179,8 +181,8 @@ fun BottomPlayer(viewModel: PlayerViewModel) {
             Icon(Icons.Default.VolumeUp, contentDescription = "Volume", tint = Color.Gray, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
             Slider(
-                value = 0.8f,
-                onValueChange = {},
+                value = volume,
+                onValueChange = { viewModel.setVolume(it) },
                 modifier = Modifier.width(80.dp).height(16.dp),
                 colors = SliderDefaults.colors(
                     thumbColor = Color.White,
