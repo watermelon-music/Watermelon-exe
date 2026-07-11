@@ -1,6 +1,6 @@
 package com.watermelon.music.data.repository
 
-import com.watermelon.music.data.remote.youtube.NewPipeInitializer
+import com.watermelon.music.data.remote.youtube.LocalAudioExtractor
 import com.watermelon.music.domain.model.Song
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,7 +13,7 @@ class MusicCatalogRepository {
     suspend fun search(query: String): List<Song> = withContext(Dispatchers.IO) {
         if (query.isBlank()) return@withContext emptyList()
         try {
-            NewPipeInitializer.ensureInitialized()
+            LocalAudioExtractor.ensureNewPipeInitialized()
             
             // Search specifically within YouTube Music (music_songs) to get official tracks
             val queryHandler = youtube.getSearchQHFactory().fromQuery(query, listOf("music_songs"), "")
