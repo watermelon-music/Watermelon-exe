@@ -282,7 +282,7 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
 fun ModernSongCard(song: Song, onClick: () -> Unit) {
     Column(
         modifier = Modifier
-            .width(140.dp)
+            .width(165.dp)
             .clickable(onClick = onClick)
     ) {
         AsyncImage(
