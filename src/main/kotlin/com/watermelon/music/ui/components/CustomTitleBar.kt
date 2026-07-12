@@ -37,59 +37,7 @@ fun WindowScope.CustomTitleBar(
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Profile Avatar
-            AsyncImage(
-                model = "https://i.pravatar.cc/150?img=11",
-                contentDescription = "Profile",
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-            
-            Spacer(modifier = Modifier.width(32.dp))
-            
-            // Window Controls
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Minimize
-                Icon(
-                    imageVector = Icons.Default.Remove,
-                    contentDescription = "Minimize",
-                    tint = Color.LightGray,
-                    modifier = Modifier.size(20.dp).clickable { 
-                        state.isMinimized = true 
-                    }
-                )
-                
-                // Maximize
-                Icon(
-                    imageVector = Icons.Default.CropSquare,
-                    contentDescription = "Maximize",
-                    tint = Color.LightGray,
-                    modifier = Modifier.size(20.dp).clickable {
-                        if (state.placement == WindowPlacement.Maximized) {
-                            state.placement = WindowPlacement.Floating
-                        } else {
-                            state.placement = WindowPlacement.Maximized
-                        }
-                    }
-                )
-                
-                // Close
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
-                    tint = Color.LightGray,
-                    modifier = Modifier.size(20.dp).clickable { onClose() }
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(32.dp))
-            
-            // Navigation Arrows
+            // Navigation Arrows (Start)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(24.dp), // Space between < and >
                 verticalAlignment = Alignment.CenterVertically
@@ -155,21 +103,60 @@ fun WindowScope.CustomTitleBar(
                         fontSize = 15.sp,
                         modifier = Modifier.weight(1f)
                     )
-                    
-                    // Separator
-                    Box(modifier = Modifier.height(24.dp).width(1.dp).background(Color.DarkGray))
-                    Spacer(modifier = Modifier.width(16.dp))
-                    
-                    Icon(
-                        imageVector = Icons.Default.FolderOpen,
-                        contentDescription = "Library",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(24.dp).clickable { /* TODO */ }
-                    )
                 }
             }
             
-            Spacer(modifier = Modifier.weight(1.5f))
+            Spacer(modifier = Modifier.weight(1f))
+            
+            // End Controls: Avatar, Window Controls
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Profile Avatar
+                AsyncImage(
+                    model = "https://i.pravatar.cc/150?img=11",
+                    contentDescription = "Profile",
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+                
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                // Minimize
+                Icon(
+                    imageVector = Icons.Default.Remove,
+                    contentDescription = "Minimize",
+                    tint = Color.LightGray,
+                    modifier = Modifier.size(20.dp).clickable { 
+                        state.isMinimized = true 
+                    }
+                )
+                
+                // Maximize
+                Icon(
+                    imageVector = Icons.Default.CropSquare,
+                    contentDescription = "Maximize",
+                    tint = Color.LightGray,
+                    modifier = Modifier.size(20.dp).clickable {
+                        if (state.placement == WindowPlacement.Maximized) {
+                            state.placement = WindowPlacement.Floating
+                        } else {
+                            state.placement = WindowPlacement.Maximized
+                        }
+                    }
+                )
+                
+                // Close
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = Color.LightGray,
+                    modifier = Modifier.size(20.dp).clickable { onClose() }
+                )
+            }
         }
     }
 }

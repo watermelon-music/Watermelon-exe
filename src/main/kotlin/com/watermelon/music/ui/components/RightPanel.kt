@@ -96,10 +96,11 @@ fun RightPanel(playerViewModel: PlayerViewModel) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .weight(1f) // Takes up remaining space for scrolling
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFF111111)) // Slightly lighter than pitch black for contrast
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                     Text(
                         text = "Recommended",
                         color = Color.White,
@@ -112,38 +113,40 @@ fun RightPanel(playerViewModel: PlayerViewModel) {
                     if (recommendedSongs.isEmpty()) {
                         Text("Loading recommendations...", color = Color.Gray, fontSize = 12.sp)
                     } else {
-                        recommendedSongs.forEach { recSong ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable { playerViewModel.playSong(recSong) },
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                AsyncImage(
-                                    model = recSong.thumbnail,
-                                    contentDescription = "Song",
-                                    contentScale = ContentScale.Crop,
+                        Column(modifier = Modifier.weight(1f).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+                            recommendedSongs.forEach { recSong ->
+                                Row(
                                     modifier = Modifier
-                                        .size(40.dp)
-                                        .clip(RoundedCornerShape(4.dp))
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = recSong.title,
-                                        color = Color.White,
-                                        fontSize = 14.sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                        .clickable { playerViewModel.playSong(recSong) },
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    AsyncImage(
+                                        model = recSong.thumbnail,
+                                        contentDescription = "Song",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .clip(RoundedCornerShape(4.dp))
                                     )
-                                    Text(
-                                        text = recSong.artist,
-                                        color = Color.Gray,
-                                        fontSize = 12.sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = recSong.title,
+                                            color = Color.White,
+                                            fontSize = 14.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = recSong.artist,
+                                            color = Color.Gray,
+                                            fontSize = 12.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
                             }
                         }
