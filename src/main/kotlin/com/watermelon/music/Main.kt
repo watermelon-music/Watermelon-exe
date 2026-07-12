@@ -60,6 +60,9 @@ fun App(playerViewModel: PlayerViewModel, navController: NavController, isRightP
                         is Screen.Home -> {
                             HomeScreen(playerViewModel)
                         }
+                        is Screen.Search -> {
+                            com.watermelon.music.ui.search.SearchScreen(playerViewModel)
+                        }
                         is Screen.Profile -> {
                             ProfileScreen()
                         }

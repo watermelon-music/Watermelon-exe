@@ -386,9 +386,9 @@ fun SexyBroadcastSection(category: String, songs: List<Song>, onSongClick: (Song
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            maxItemsInEachRow = 3
+            maxItemsInEachRow = 5
         ) {
-            for (song in songs.take(6)) {
+            for (song in songs.take(10)) { // Show up to 10 so we have 2 rows of 5
                 BroadcastCard(
                     song = song,
                     modifier = Modifier.weight(1f),
@@ -408,9 +408,9 @@ fun BroadcastCard(song: Song, modifier: Modifier = Modifier, onClick: () -> Unit
             .clickable(onClick = onClick)
     ) {
         AsyncImage(
-            model = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=3840&auto=format&fit=crop", // Stunning 4K DJ/Music placeholder for all broadcasts
+            model = song.thumbnail, // Revert to original thumbnail
             contentDescription = "Cover",
-            contentScale = ContentScale.Crop, // Fill perfectly
+            contentScale = ContentScale.Fit, // Use Fit to not stretch tiny favicons
             modifier = Modifier.fillMaxSize().background(Color(0xFF1E1E1E))
         )
         
