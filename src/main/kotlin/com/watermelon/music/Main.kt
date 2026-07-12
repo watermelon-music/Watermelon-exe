@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.WindowPlacement
 import com.watermelon.music.navigation.NavController
 import com.watermelon.music.navigation.Screen
 import com.watermelon.music.ui.auth.LoginScreen
@@ -101,7 +102,7 @@ fun main() = application {
     }
     
     val playerViewModel = remember { PlayerViewModel() }
-    val windowState = androidx.compose.ui.window.rememberWindowState()
+    val windowState = androidx.compose.ui.window.rememberWindowState(placement = WindowPlacement.Maximized)
 
     Window(
         onCloseRequest = ::exitApplication,

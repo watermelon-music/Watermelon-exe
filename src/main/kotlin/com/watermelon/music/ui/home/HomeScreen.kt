@@ -249,7 +249,7 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp)
+            .height(400.dp) // Increased height from 300 to 400
             .clip(RoundedCornerShape(16.dp))
             .background(Color(0xFF111111))
     ) {
@@ -258,6 +258,7 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
             model = currentSong.thumbnail,
             contentDescription = "Concert",
             contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter, // Crop from top instead of center
             modifier = Modifier.fillMaxSize()
         )
         // Dark Overlay for readability
@@ -458,17 +459,17 @@ fun BroadcastCard(song: Song, modifier: Modifier = Modifier, onClick: () -> Unit
 fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(24.dp))
-            .background(if (isSelected) Color.White else Color(0xFF111111))
+            .clip(RoundedCornerShape(8.dp)) // Less rounded for a sharper look
+            .background(if (isSelected) Color(0xFFFF4040) else Color(0xFF1A1A1A)) // Use theme red instead of white
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 20.dp, vertical = 10.dp), // Slightly larger
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            color = if (isSelected) Color.Black else Color.White,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp
+            color = if (isSelected) Color.White else Color.Gray, // Better contrast
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp
         )
     }
 }
