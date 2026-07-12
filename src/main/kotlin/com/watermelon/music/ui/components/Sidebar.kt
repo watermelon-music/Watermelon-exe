@@ -29,25 +29,15 @@ fun Sidebar(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxHeight()
-            .width(80.dp)
+            .width(64.dp)
             .background(Color(0xFF050505)) // Pitch Black
             .padding(vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Menu / Logo Icon
-        Icon(
-            imageVector = Icons.Default.Menu,
-            contentDescription = "Menu",
-            tint = Color.White,
-            modifier = Modifier.size(28.dp).clickable { navController.navigate(Screen.Home) }
-        )
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
         // Plus Button
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(Color(0xFF1E1E1E))
                 .clickable { /* Add new playlist */ },
@@ -57,7 +47,7 @@ fun Sidebar(navController: NavController) {
                 imageVector = Icons.Default.Add,
                 contentDescription = "Add",
                 tint = Color.White,
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
         
@@ -66,7 +56,7 @@ fun Sidebar(navController: NavController) {
         // Liked Songs (Heart)
         Box(
             modifier = Modifier
-                .size(56.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(Color(0xFFF6070A))
                 .clickable { navController.navigate(Screen.Library) },
@@ -76,22 +66,9 @@ fun Sidebar(navController: NavController) {
                 imageVector = Icons.Default.Favorite,
                 contentDescription = "Liked Songs",
                 tint = Color.White,
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(20.dp) // heart to be smaller inside red circle
             )
         }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Dummy Playlist Covers
-        PlaylistIcon("https://i.scdn.co/image/ab67706c0000da845b410f95b5cc454226fbf285")
-        Spacer(modifier = Modifier.height(16.dp))
-        PlaylistIcon("https://i.scdn.co/image/ab67706c0000da843f54593edec566f0653697eb")
-        Spacer(modifier = Modifier.height(16.dp))
-        PlaylistIcon("https://i.scdn.co/image/ab67706c0000da84b6fbb7fc21c009d13f9c66cc")
-        Spacer(modifier = Modifier.height(16.dp))
-        PlaylistIcon("https://i.scdn.co/image/ab67616d0000b273db16e53c7a02c5c99dd1844b")
-        Spacer(modifier = Modifier.height(16.dp))
-        PlaylistIcon("https://i.scdn.co/image/ab67616d0000b273ea7caaff71dea1051d49b2fe")
     }
 }
 

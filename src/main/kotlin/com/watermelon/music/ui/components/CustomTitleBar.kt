@@ -23,10 +23,14 @@ import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowState
 import coil3.compose.AsyncImage
 
+import com.watermelon.music.navigation.NavController
+import com.watermelon.music.navigation.Screen
+
 @Composable
 fun WindowScope.CustomTitleBar(
     state: WindowState,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    navController: NavController
 ) {
     WindowDraggableArea {
         Row(
@@ -46,13 +50,13 @@ fun WindowScope.CustomTitleBar(
                     imageVector = Icons.Default.ChevronLeft,
                     contentDescription = "Back",
                     tint = Color.Gray,
-                    modifier = Modifier.size(28.dp).clickable { /* TODO */ }
+                    modifier = Modifier.size(28.dp).clickable { navController.popBackStack() }
                 )
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = "Forward",
                     tint = Color.Gray,
-                    modifier = Modifier.size(28.dp).clickable { /* TODO */ }
+                    modifier = Modifier.size(28.dp).clickable { navController.goForward() }
                 )
             }
             
@@ -69,7 +73,7 @@ fun WindowScope.CustomTitleBar(
                         .size(48.dp)
                         .clip(CircleShape)
                         .background(Color(0xFF1E1E1E))
-                        .clickable { /* TODO */ },
+                        .clickable { navController.navigate(Screen.Home) },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -87,7 +91,8 @@ fun WindowScope.CustomTitleBar(
                         .height(48.dp)
                         .clip(RoundedCornerShape(24.dp))
                         .background(Color(0xFF1E1E1E))
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 16.dp)
+                        .clickable { navController.navigate(Screen.Search) },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(

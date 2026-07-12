@@ -33,8 +33,7 @@ import androidx.compose.ui.input.key.*
 
 @Composable
 @Preview
-fun App(playerViewModel: PlayerViewModel) {
-    val navController = remember { NavController(Screen.Home) }
+fun App(playerViewModel: PlayerViewModel, navController: NavController) {
 
     MaterialTheme {
         Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
@@ -123,12 +122,14 @@ fun main() = application {
             }
         }
     ) {
+        val navController = remember { NavController(Screen.Home) }
         Column(modifier = Modifier.fillMaxSize()) {
             CustomTitleBar(
                 state = windowState,
-                onClose = ::exitApplication
+                onClose = ::exitApplication,
+                navController = navController
             )
-            App(playerViewModel)
+            App(playerViewModel, navController)
         }
     }
 }

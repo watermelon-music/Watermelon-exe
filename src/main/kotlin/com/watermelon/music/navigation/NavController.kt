@@ -19,17 +19,30 @@ class NavController(initialScreen: Screen) {
         private set
 
     private val backStack = mutableListOf<Screen>()
+    private val forwardStack = mutableListOf<Screen>()
 
     fun navigate(screen: Screen) {
         if (currentScreen != screen) {
             backStack.add(currentScreen)
+            forwardStack.clear()
             currentScreen = screen
         }
     }
 
     fun popBackStack(): Boolean {
         return if (backStack.isNotEmpty()) {
+            forwardStack.add(currentScreen)
             currentScreen = backStack.removeLast()
+            true
+        } else {
+            false
+        }
+    }
+    
+    fun goForward(): Boolean {
+        return if (forwardStack.isNotEmpty()) {
+            backStack.add(currentScreen)
+            currentScreen = forwardStack.removeLast()
             true
         } else {
             false
