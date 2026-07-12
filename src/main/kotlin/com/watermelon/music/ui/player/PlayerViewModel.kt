@@ -12,8 +12,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.watermelon.music.data.repository.MusicCatalogRepository
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
+
+data class LyricLine(
+    val timeSeconds: Float,
+    val text: String
+)
 
 class PlayerViewModel {
+    private val client = OkHttpClient()
     private val scope = CoroutineScope(Dispatchers.Main)
     
     val currentSong = AudioPlayer.currentSong
@@ -30,6 +39,9 @@ class PlayerViewModel {
     
     private val _recommendedSongs = MutableStateFlow<List<Song>>(emptyList())
     val recommendedSongs: StateFlow<List<Song>> = _recommendedSongs.asStateFlow()
+    
+    private val _currentLyrics = MutableStateFlow<List<LyricLine>>(emptyList())
+    val currentLyrics: StateFlow<List<LyricLine>> = _currentLyrics.asStateFlow()
 
     // Queue logic
     private val _currentQueue = MutableStateFlow<List<Song>>(emptyList())
@@ -50,6 +62,55 @@ class PlayerViewModel {
                     _recommendedSongs.value = repository.search("similar to ${song.artist} ${song.title}").take(7)
                 } catch (e: Exception) {
                     e.printStackTrace()
+                }
+            }
+            
+            // Fetch lyrics from LRCLIB
+            launch(Dispatchers.IO) {
+                try {
+                    val url = "https://lrclib.net/api/get?track_name=${java.net.URLEncoder.encode(song.title, "UTF-8")}&artist_name=${java.net.URLEncoder.encode(song.artist, "UTF-8")}"
+                    val request = Request.Builder().url(url).build()
+                    val response = client.newCall(request).execute()
+                    if (response.isSuccessful) {
+                        val body = response.body?.string()
+                        if (body != null) {
+                            val json = JSONObject(body)
+                            val syncedLyrics = json.optString("syncedLyrics", "")
+                            if (syncedLyrics.isNotBlank()) {
+                                val lines = syncedLyrics.lines().mapNotNull { line ->
+                                    // Parse format like [00:19.67] We're no strangers to love
+                                    val match = Regex("\\[(\\d+):(\\d+\\.\\d+)\\](.*)").find(line)
+                                    if (match != null) {
+                                        val min = match.groupValues[1].toInt()
+                                        val sec = match.groupValues[2].toFloat()
+                                        val text = match.groupValues[3].trim()
+                                        LyricLine((min * 60) + sec, text)
+                                    } else null
+                                }
+                                _currentLyrics.value = lines
+                            } else {
+                                val plainLyrics = json.optString("plainLyrics", "")
+                                if (plainLyrics.isNotBlank()) {
+                                    val durationStr = song.duration ?: "0:0"
+                                    val durParts = durationStr.split(":")
+                                    val durSecs = if (durParts.size == 2) (durParts[0].toIntOrNull() ?: 0) * 60 + (durParts[1].toIntOrNull() ?: 0) else 180
+                                    
+                                    val lines = plainLyrics.lines().filter { it.isNotBlank() }
+                                    val timePerLine = (durSecs.toFloat() / lines.size).coerceAtLeast(1f)
+                                    _currentLyrics.value = lines.mapIndexed { index, text -> 
+                                        LyricLine(index * timePerLine, text)
+                                    }
+                                } else {
+                                    _currentLyrics.value = emptyList()
+                                }
+                            }
+                        }
+                    } else {
+                        _currentLyrics.value = emptyList()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _currentLyrics.value = emptyList()
                 }
             }
             

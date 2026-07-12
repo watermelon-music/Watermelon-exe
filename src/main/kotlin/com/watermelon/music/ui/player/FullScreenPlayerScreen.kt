@@ -23,6 +23,7 @@ import coil3.compose.AsyncImage
 fun FullScreenPlayerScreen(viewModel: PlayerViewModel) {
     val currentSong by viewModel.currentSong.collectAsState()
     val progress by viewModel.progress.collectAsState()
+    val lyrics by viewModel.currentLyrics.collectAsState()
 
     if (currentSong == null) {
         Box(modifier = Modifier.fillMaxSize().background(Color(0xFF07304B)), contentAlignment = Alignment.Center) {
@@ -109,30 +110,35 @@ fun FullScreenPlayerScreen(viewModel: PlayerViewModel) {
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // Placeholder lyrics
-                val lyrics = listOf(
-                    "This is a beautiful song",
-                    "Playing just for you",
-                    "We don't have real lyrics yet",
-                    "But it sure looks great",
-                    "In this full screen view",
-                    "Watermelon music is awesome",
-                    "Feel the beat, feel the rhythm",
-                    "Keep on listening",
-                    "All night long"
-                )
-                val activeIndex = (progress * lyrics.size).toInt().coerceIn(0, lyrics.size - 1)
-                
-                items(lyrics.size) { index ->
-                    val isActive = index == activeIndex
-                    Text(
-                        text = lyrics[index],
-                        color = if (isActive) Color.White else Color.White.copy(alpha = 0.4f),
-                        fontSize = if (isActive) 36.sp else 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        lineHeight = 44.sp,
-                        textAlign = TextAlign.Start
-                    )
+                if (lyrics.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No lyrics found for this song...",
+                            color = Color.White.copy(alpha = 0.5f),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                } else {
+                    val durationStr = currentSong?.duration ?: "0:0"
+                    val durParts = durationStr.split(":")
+                    val totalSecs = if (durParts.size == 2) (durParts[0].toIntOrNull() ?: 0) * 60 + (durParts[1].toIntOrNull() ?: 0) else 180
+                    val currentSecs = progress * totalSecs
+                    
+                    val activeIndex = lyrics.indexOfLast { it.timeSeconds <= currentSecs }.coerceAtLeast(0)
+                    
+                    items(lyrics.size) { index ->
+                        val isActive = index == activeIndex
+                        Text(
+                            text = lyrics[index].text,
+                            color = if (isActive) Color.White else Color.White.copy(alpha = 0.4f),
+                            fontSize = if (isActive) 36.sp else 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 44.sp,
+                            textAlign = TextAlign.Start
+                        )
+                    }
                 }
             }
         }
