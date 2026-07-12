@@ -30,6 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.Crossfade
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -232,9 +235,15 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                         // Show Radio in ALL
                         if (viewModel.topGlobalRadios.isNotEmpty()) {
                             item {
-                                SongCategoryRow(
-                                    category = "Radio Stations",
-                                    songs = viewModel.topGlobalRadios.take(6),
+                                Text(
+                                    text = "Radio Stations",
+                                    color = Color.White,
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    modifier = Modifier.padding(bottom = 16.dp)
+                                )
+                                RadioGridBox(
+                                    radios = viewModel.topGlobalRadios.take(4),
                                     onSongClick = { song -> playerViewModel?.playRadio(song) },
                                     onSongRightClick = { song -> 
                                         selectedActionSong = song
@@ -242,15 +251,22 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                         actionSongsList = null
                                     }
                                 )
+                                Spacer(modifier = Modifier.height(32.dp))
                             }
                         }
                         // Show Broadcasts in ALL
                         val broadcasts = viewModel.categories["broadcasts"] ?: emptyList()
-                        if (broadcasts.isNotEmpty()) {
+                        if (broadcasts.size >= 20) {
                             item {
-                                SexyBroadcastSection(
-                                    category = "Top Broadcasts",
-                                    songs = broadcasts.take(5),
+                                Text(
+                                    text = "Top Broadcasts",
+                                    color = Color.White,
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    modifier = Modifier.padding(bottom = 16.dp)
+                                )
+                                RotatingBroadcastBox(
+                                    broadcasts = broadcasts.drop(10).take(10),
                                     onSongClick = { song -> playerViewModel?.playRadio(song, broadcasts) },
                                     onSongRightClick = { song -> 
                                         selectedActionSong = song
@@ -258,6 +274,27 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                         actionSongsList = broadcasts
                                     }
                                 )
+                                Spacer(modifier = Modifier.height(32.dp))
+                            }
+                        } else if (broadcasts.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Top Broadcasts",
+                                    color = Color.White,
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    modifier = Modifier.padding(bottom = 16.dp)
+                                )
+                                RotatingBroadcastBox(
+                                    broadcasts = broadcasts,
+                                    onSongClick = { song -> playerViewModel?.playRadio(song, broadcasts) },
+                                    onSongRightClick = { song -> 
+                                        selectedActionSong = song
+                                        isBroadcastAction = true
+                                        actionSongsList = broadcasts
+                                    }
+                                )
+                                Spacer(modifier = Modifier.height(32.dp))
                             }
                         }
                         item { AdBannerPlaceholder() }
@@ -581,6 +618,58 @@ fun BroadcastCard(song: Song, modifier: Modifier = Modifier, onSongRightClick: (
                 )
             }
         }
+    }
+}
+
+@Composable
+fun RadioGridBox(radios: List<Song>, onSongRightClick: ((Song) -> Unit)? = null, onSongClick: (Song) -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color(0xFF1E1E1E))
+            .padding(16.dp)
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            val rows = radios.chunked(2)
+            for (rowSongs in rows) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    for (song in rowSongs) {
+                        ModernSongCard(
+                            song = song,
+                            onSongRightClick = { onSongRightClick?.invoke(song) },
+                            onClick = { onSongClick(song) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RotatingBroadcastBox(broadcasts: List<Song>, onSongRightClick: ((Song) -> Unit)? = null, onSongClick: (Song) -> Unit) {
+    if (broadcasts.isEmpty()) return
+    var currentIndex by remember { mutableStateOf(0) }
+
+    LaunchedEffect(broadcasts) {
+        while (true) {
+            delay(3000)
+            currentIndex = (currentIndex + 1) % broadcasts.size
+        }
+    }
+
+    Crossfade(targetState = currentIndex) { index ->
+        val song = broadcasts[index]
+        BroadcastCard(
+            song = song,
+            modifier = Modifier.fillMaxWidth().height(280.dp), // Make it a big box
+            onSongRightClick = { onSongRightClick?.invoke(song) },
+            onClick = { onSongClick(song) }
+        )
     }
 }
 

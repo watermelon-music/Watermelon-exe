@@ -80,8 +80,8 @@ fun ActionRow(text: String, icon: androidx.compose.ui.graphics.vector.ImageVecto
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = text, tint = Color.White, modifier = Modifier.size(24.dp))
+        Icon(icon, contentDescription = text, tint = Color.White, modifier = Modifier.size(32.dp))
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        Text(text, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Medium)
     }
 }
