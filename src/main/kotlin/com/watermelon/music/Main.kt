@@ -83,7 +83,7 @@ fun App(playerViewModel: PlayerViewModel, navController: NavController, isRightP
                 } // Closes else
                 
                 // Right Panel (Context Panel)
-                if (isRightPanelVisible && navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
+                if (!isFullScreenMode && isRightPanelVisible && navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
                     com.watermelon.music.ui.components.RightPanel(playerViewModel, onClose = onToggleRightPanel)
                 }
             } // Closes Row

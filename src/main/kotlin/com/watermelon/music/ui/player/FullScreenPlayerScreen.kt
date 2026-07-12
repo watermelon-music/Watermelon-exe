@@ -22,6 +22,7 @@ import coil3.compose.AsyncImage
 @Composable
 fun FullScreenPlayerScreen(viewModel: PlayerViewModel) {
     val currentSong by viewModel.currentSong.collectAsState()
+    val progress by viewModel.progress.collectAsState()
 
     if (currentSong == null) {
         Box(modifier = Modifier.fillMaxSize().background(Color(0xFF07304B)), contentAlignment = Alignment.Center) {
@@ -120,9 +121,10 @@ fun FullScreenPlayerScreen(viewModel: PlayerViewModel) {
                     "Keep on listening",
                     "All night long"
                 )
+                val activeIndex = (progress * lyrics.size).toInt().coerceIn(0, lyrics.size - 1)
                 
                 items(lyrics.size) { index ->
-                    val isActive = index == 3 // Highlight a random line for effect
+                    val isActive = index == activeIndex
                     Text(
                         text = lyrics[index],
                         color = if (isActive) Color.White else Color.White.copy(alpha = 0.4f),
