@@ -18,6 +18,7 @@ import com.watermelon.music.navigation.NavController
 import com.watermelon.music.navigation.Screen
 import com.watermelon.music.ui.auth.LoginScreen
 import com.watermelon.music.ui.components.Sidebar
+import com.watermelon.music.ui.components.CustomTitleBar
 import com.watermelon.music.ui.home.HomeScreen
 import com.watermelon.music.ui.player.BottomPlayer
 import com.watermelon.music.ui.player.PlayerViewModel
@@ -123,7 +124,7 @@ fun main() = application {
         }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            com.watermelon.music.ui.components.CustomTitleBar(
+            CustomTitleBar(
                 state = windowState,
                 onClose = ::exitApplication
             )
