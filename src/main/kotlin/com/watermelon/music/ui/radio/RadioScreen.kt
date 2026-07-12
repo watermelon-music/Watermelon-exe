@@ -13,6 +13,10 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.PointerMatcher
+import androidx.compose.foundation.onClick
+import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -106,22 +110,37 @@ fun RadioScreen(playerViewModel: PlayerViewModel?) {
                         AdBannerPlaceholder()
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-                    RadioSongRow(song) {
-                        selectedActionSong = song
-                    }
+                    RadioSongRow(
+                        song = song,
+                        onSongRightClick = { selectedActionSong = song },
+                        onClick = { playerViewModel?.playSong(song) }
+                    )
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RadioSongRow(song: Song, onClick: () -> Unit) {
+fun RadioSongRow(song: Song, onSongRightClick: (() -> Unit)? = null, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable(onClick = onClick),
+            .run {
+                if (onSongRightClick != null) {
+                    onClick(
+                        matcher = PointerMatcher.mouse(PointerButton.Secondary),
+                        onClick = onSongRightClick
+                    ).onClick(
+                        matcher = PointerMatcher.mouse(PointerButton.Primary),
+                        onClick = onClick
+                    )
+                } else {
+                    clickable(onClick = onClick)
+                }
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box {

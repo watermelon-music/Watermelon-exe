@@ -1,5 +1,9 @@
 package com.watermelon.music.ui.home
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.PointerMatcher
+import androidx.compose.foundation.onClick
+import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -138,12 +142,7 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                         }
                     }
 
-                    // HERO BANNER
-                    if (viewModel.currentFilter == HomeViewModel.Filter.ALL || viewModel.currentFilter == HomeViewModel.Filter.MUSIC) {
-                        item {
-                            HeroBanner(viewModel, playerViewModel)
-                        }
-                    }
+
 
                     // No Recommended Row anymore, jump straight to Categories
                     
@@ -236,7 +235,8 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                 SongCategoryRow(
                                     category = "Radio Stations",
                                     songs = viewModel.topGlobalRadios.take(6),
-                                    onSongClick = { song -> 
+                                    onSongClick = { song -> playerViewModel?.playRadio(song) },
+                                    onSongRightClick = { song -> 
                                         selectedActionSong = song
                                         isBroadcastAction = true
                                         actionSongsList = null
@@ -251,7 +251,8 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                 SexyBroadcastSection(
                                     category = "Top Broadcasts",
                                     songs = broadcasts.take(5),
-                                    onSongClick = { song -> 
+                                    onSongClick = { song -> playerViewModel?.playRadio(song, broadcasts) },
+                                    onSongRightClick = { song -> 
                                         selectedActionSong = song
                                         isBroadcastAction = true
                                         actionSongsList = broadcasts
@@ -267,7 +268,8 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                 SongCategoryRow(
                                     category = category.title,
                                     songs = songs,
-                                    onSongClick = { song -> 
+                                    onSongClick = { song -> playerViewModel?.playSong(song, songs) },
+                                    onSongRightClick = { song -> 
                                         selectedActionSong = song
                                         isBroadcastAction = false
                                         actionSongsList = songs
@@ -285,7 +287,8 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                     SexyBroadcastSection(
                                         category = category.title,
                                         songs = songs,
-                                        onSongClick = { song -> 
+                                        onSongClick = { song -> playerViewModel?.playRadio(song, songs) },
+                                        onSongRightClick = { song -> 
                                             selectedActionSong = song
                                             isBroadcastAction = true
                                             actionSongsList = songs
@@ -295,7 +298,8 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                     SongCategoryRow(
                                         category = category.title,
                                         songs = songs,
-                                        onSongClick = { song -> 
+                                        onSongClick = { song -> playerViewModel?.playSong(song, songs) },
+                                        onSongRightClick = { song -> 
                                             selectedActionSong = song
                                             isBroadcastAction = false
                                             actionSongsList = songs
@@ -403,12 +407,25 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ModernSongCard(song: Song, onClick: () -> Unit) {
+fun ModernSongCard(song: Song, onSongRightClick: (() -> Unit)? = null, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .width(180.dp) // Make songs image bigger
-            .clickable(onClick = onClick)
+            .run {
+                if (onSongRightClick != null) {
+                    onClick(
+                        matcher = PointerMatcher.mouse(PointerButton.Secondary),
+                        onClick = onSongRightClick
+                    ).onClick(
+                        matcher = PointerMatcher.mouse(PointerButton.Primary),
+                        onClick = onClick
+                    )
+                } else {
+                    clickable(onClick = onClick)
+                }
+            }
     ) {
         AsyncImage(
             model = song.thumbnail,
@@ -444,7 +461,7 @@ fun ModernSongCard(song: Song, onClick: () -> Unit) {
 }
 
 @Composable
-fun SongCategoryRow(category: String, songs: List<Song>, onSongClick: (Song) -> Unit) {
+fun SongCategoryRow(category: String, songs: List<Song>, onSongRightClick: ((Song) -> Unit)? = null, onSongClick: (Song) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = category,
@@ -458,9 +475,11 @@ fun SongCategoryRow(category: String, songs: List<Song>, onSongClick: (Song) -> 
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(songs) { song ->
-                ModernSongCard(song) {
-                    onSongClick(song)
-                }
+                ModernSongCard(
+                    song = song,
+                    onSongRightClick = { onSongRightClick?.invoke(song) },
+                    onClick = { onSongClick(song) }
+                )
             }
         }
         Spacer(modifier = Modifier.height(24.dp))
@@ -469,7 +488,7 @@ fun SongCategoryRow(category: String, songs: List<Song>, onSongClick: (Song) -> 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SexyBroadcastSection(category: String, songs: List<Song>, onSongClick: (Song) -> Unit) {
+fun SexyBroadcastSection(category: String, songs: List<Song>, onSongRightClick: ((Song) -> Unit)? = null, onSongClick: (Song) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp)) {
         Text(
             text = category,
@@ -489,6 +508,7 @@ fun SexyBroadcastSection(category: String, songs: List<Song>, onSongClick: (Song
                 BroadcastCard(
                     song = song,
                     modifier = Modifier.weight(1f),
+                    onSongRightClick = { onSongRightClick?.invoke(song) },
                     onClick = { onSongClick(song) }
                 )
             }
@@ -496,13 +516,26 @@ fun SexyBroadcastSection(category: String, songs: List<Song>, onSongClick: (Song
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BroadcastCard(song: Song, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun BroadcastCard(song: Song, modifier: Modifier = Modifier, onSongRightClick: (() -> Unit)? = null, onClick: () -> Unit) {
     Box(
         modifier = modifier
             .aspectRatio(1f) // Make it perfectly square
             .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
+            .run {
+                if (onSongRightClick != null) {
+                    onClick(
+                        matcher = PointerMatcher.mouse(PointerButton.Secondary),
+                        onClick = onSongRightClick
+                    ).onClick(
+                        matcher = PointerMatcher.mouse(PointerButton.Primary),
+                        onClick = onClick
+                    )
+                } else {
+                    clickable(onClick = onClick)
+                }
+            }
     ) {
         AsyncImage(
             model = song.thumbnail, // Revert to original thumbnail

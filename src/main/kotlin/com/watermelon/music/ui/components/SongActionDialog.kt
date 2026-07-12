@@ -9,7 +9,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PlaylistAdd
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,7 +62,7 @@ fun SongActionDialog(
 
             // Add to Playlist (Only for normal songs)
             if (!isRadioOrBroadcast) {
-                ActionRow("Add to Playlist", Icons.Default.PlaylistAdd) {
+                ActionRow("Add to Playlist", Icons.AutoMirrored.Filled.PlaylistAdd) {
                     onAddToPlaylist()
                     onDismiss()
                 }
