@@ -18,6 +18,9 @@ object AudioPlayer {
 
     private val _progress = MutableStateFlow(0f)
     val progress: StateFlow<Float> = _progress.asStateFlow()
+    
+    private val _currentPositionMs = MutableStateFlow(0L)
+    val currentPositionMs: StateFlow<Long> = _currentPositionMs.asStateFlow()
 
     private val _volume = MutableStateFlow(1f)
     val volume: StateFlow<Float> = _volume.asStateFlow()
@@ -62,7 +65,9 @@ object AudioPlayer {
                 currentTimeProperty().addListener { _, _, newValue ->
                     val total = totalDuration.toMillis()
                     if (total > 0) {
-                        _progress.value = (newValue.toMillis() / total).toFloat()
+                        val currentMs = newValue.toMillis().toLong()
+                        _currentPositionMs.value = currentMs
+                        _progress.value = (currentMs.toFloat() / total.toFloat())
                     }
                 }
             }

@@ -3,11 +3,11 @@ package com.watermelon.music.ui.player
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +23,7 @@ import coil3.compose.AsyncImage
 fun FullScreenPlayerScreen(viewModel: PlayerViewModel) {
     val currentSong by viewModel.currentSong.collectAsState()
     val progress by viewModel.progress.collectAsState()
+    val currentPositionMs by viewModel.currentPositionMs.collectAsState()
     val lyrics by viewModel.currentLyrics.collectAsState()
 
     if (currentSong == null) {
@@ -105,8 +106,10 @@ fun FullScreenPlayerScreen(viewModel: PlayerViewModel) {
                 fontSize = 24.sp,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
+            val listState = rememberLazyListState()
             
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
@@ -121,11 +124,7 @@ fun FullScreenPlayerScreen(viewModel: PlayerViewModel) {
                         )
                     }
                 } else {
-                    val durationStr = currentSong?.duration ?: "0:0"
-                    val durParts = durationStr.split(":")
-                    val totalSecs = if (durParts.size == 2) (durParts[0].toIntOrNull() ?: 0) * 60 + (durParts[1].toIntOrNull() ?: 0) else 180
-                    val currentSecs = progress * totalSecs
-                    
+                    val currentSecs = currentPositionMs / 1000f
                     val activeIndex = lyrics.indexOfLast { it.timeSeconds <= currentSecs }.coerceAtLeast(0)
                     
                     items(lyrics.size) { index ->
@@ -139,6 +138,16 @@ fun FullScreenPlayerScreen(viewModel: PlayerViewModel) {
                             textAlign = TextAlign.Start
                         )
                     }
+                }
+            }
+            
+            // Auto scroll to active lyric line
+            val activeIndex = if (lyrics.isNotEmpty()) lyrics.indexOfLast { it.timeSeconds <= (currentPositionMs / 1000f) }.coerceAtLeast(0) else -1
+            LaunchedEffect(activeIndex) {
+                if (activeIndex >= 0) {
+                    // Try to scroll so the item is somewhat centered (e.g. subtracting an offset, or just animate to it)
+                    // We'll scroll such that it's near the top for now
+                    listState.animateScrollToItem(activeIndex)
                 }
             }
         }

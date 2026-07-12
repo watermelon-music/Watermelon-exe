@@ -28,6 +28,7 @@ class PlayerViewModel {
     val currentSong = AudioPlayer.currentSong
     val isPlaying = AudioPlayer.isPlaying
     val progress = AudioPlayer.progress
+    val currentPositionMs = AudioPlayer.currentPositionMs
     val volume = AudioPlayer.volume
     
     val library = com.watermelon.music.data.LibraryEngine.library
