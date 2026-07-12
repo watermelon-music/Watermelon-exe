@@ -12,6 +12,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,6 +43,7 @@ fun ProfileScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0F0F0F)) // Deep dark theme background
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -138,23 +141,41 @@ fun ProfileScreen(navController: NavController) {
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(24.dp))
         
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .height(54.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFFFF4040))
-                .clickable { },
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+                .clip(RoundedCornerShape(24.dp))
+                .background(Color(0xFF161616))
+                .border(1.dp, Color(0xFF222222), RoundedCornerShape(24.dp))
         ) {
-            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout", tint = Color.White, modifier = Modifier.size(24.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Log Out", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            ProfileOptionRow(Icons.Default.Share, "Share Application")
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF222222)))
+            ProfileOptionRow(Icons.Default.Info, "About")
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF222222)))
+            ProfileOptionRow(Icons.Default.Delete, "Delete Account", Color(0xFFFF4040))
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF222222)))
+            ProfileOptionRow(Icons.AutoMirrored.Filled.Logout, "Log Out")
         }
         
         Spacer(modifier = Modifier.height(32.dp))
+    }
+}
+
+@Composable
+fun ProfileOptionRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, tint: Color = Color.White) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { }
+            .padding(20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = title, tint = tint, modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(title, color = tint, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        Spacer(modifier = Modifier.weight(1f))
+        Icon(Icons.Default.ChevronRight, contentDescription = "Go", tint = Color.Gray, modifier = Modifier.size(24.dp))
     }
 }

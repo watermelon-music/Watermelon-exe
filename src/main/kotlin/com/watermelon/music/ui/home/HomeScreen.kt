@@ -298,8 +298,8 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
         AsyncImage(
             model = currentSong.thumbnail,
             contentDescription = "Concert",
-            contentScale = ContentScale.Crop,
-            alignment = Alignment.TopCenter, // Crop from top instead of center
+            contentScale = ContentScale.Fit, // Don't crop heavily
+            alignment = Alignment.Center, 
             modifier = Modifier.fillMaxSize()
         )
         // Dark Overlay for readability
