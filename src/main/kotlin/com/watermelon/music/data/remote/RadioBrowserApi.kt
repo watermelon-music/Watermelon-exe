@@ -23,7 +23,43 @@ object RadioBrowserApi {
     // Radio Browser public endpoints usually have multiple mirrors, de1 is generally stable.
     private const val BASE_URL = "https://de1.api.radio-browser.info/json"
 
-    suspend fun getTopCountries(limit: Int = 15): List<String> = withContext(Dispatchers.IO) {
+    suspend fun getTopGlobalStations(limit: Int = 10): List<Song> = withContext(Dispatchers.IO) {
+        val request = Request.Builder()
+            .url("$BASE_URL/stations/topvote?limit=$limit")
+            .build()
+        try {
+            client.newCall(request).execute().use { response ->
+                val body = response.body?.string()
+                if (body.isNullOrBlank()) return@withContext emptyList()
+                
+                val jsonArray = Json.parseToJsonElement(body).jsonArray
+                val stations = mutableListOf<Song>()
+                for (item in jsonArray) {
+                    val obj = item.jsonObject
+                    var streamUrl = obj["url_resolved"]?.jsonPrimitive?.content ?: ""
+                    if (streamUrl.isBlank()) streamUrl = obj["url"]?.jsonPrimitive?.content ?: ""
+                    
+                    if (streamUrl.isNotBlank()) {
+                        stations.add(
+                            Song(
+                                id = streamUrl,
+                                title = obj["name"]?.jsonPrimitive?.content?.trim() ?: "Unknown Station",
+                                artist = obj["country"]?.jsonPrimitive?.content ?: "Global",
+                                thumbnail = obj["favicon"]?.jsonPrimitive?.content ?: "",
+                                duration = "LIVE"
+                            )
+                        )
+                    }
+                }
+                stations
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    suspend fun getTopCountries(limit: Int = 30): List<com.watermelon.music.domain.model.Country> = withContext(Dispatchers.IO) {
         val request = Request.Builder()
             .url("$BASE_URL/countries?limit=$limit&order=stationcount&reverse=true")
             .build()
@@ -33,10 +69,14 @@ object RadioBrowserApi {
                 if (body.isNullOrBlank()) return@withContext emptyList()
                 
                 val jsonArray = Json.parseToJsonElement(body).jsonArray
-                val countries = mutableListOf<String>()
+                val countries = mutableListOf<com.watermelon.music.domain.model.Country>()
                 for (item in jsonArray) {
                     val obj = item.jsonObject
-                    countries.add(obj["name"]?.jsonPrimitive?.content ?: "")
+                    val name = obj["name"]?.jsonPrimitive?.content ?: ""
+                    val isoCode = obj["iso_3166_1"]?.jsonPrimitive?.content ?: ""
+                    if (name.isNotBlank() && isoCode.isNotBlank()) {
+                        countries.add(com.watermelon.music.domain.model.Country(name, isoCode))
+                    }
                 }
                 countries
             }

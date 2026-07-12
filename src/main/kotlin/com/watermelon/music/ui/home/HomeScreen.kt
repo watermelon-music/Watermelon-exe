@@ -20,12 +20,15 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
@@ -131,20 +134,94 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                     }
-                    items(viewModel.currentCategories) { category ->
-                        val songs = viewModel.categories[category.id]
-                        if (!songs.isNullOrEmpty()) {
-                            SongCategoryRow(
-                                category = category.title,
-                                songs = songs,
-                                onSongClick = { song ->
-                                    if (viewModel.currentFilter == HomeViewModel.Filter.RADIO) {
-                                        playerViewModel?.playRadio(song)
-                                    } else {
-                                        playerViewModel?.playSong(song)
+                    if (viewModel.currentFilter == HomeViewModel.Filter.RADIO) {
+                        if (viewModel.selectedRadioCountry == null) {
+                            if (viewModel.topGlobalRadios.isNotEmpty()) {
+                                item {
+                                    SongCategoryRow(
+                                        category = "Top Global Radios",
+                                        songs = viewModel.topGlobalRadios,
+                                        onSongClick = { song -> playerViewModel?.playRadio(song) }
+                                    )
+                                }
+                            }
+                            item {
+                                Text(
+                                    text = "Browse by Country",
+                                    color = Color.White,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(bottom = 16.dp, top = 8.dp)
+                                )
+                            }
+                            
+                            val chunkedCountries = viewModel.radioCountries.chunked(3)
+                            items(chunkedCountries) { rowCountries ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    for (country in rowCountries) {
+                                        CountryCard(
+                                            country = country,
+                                            modifier = Modifier.weight(1f),
+                                            onClick = { viewModel.selectRadioCountry(country) }
+                                        )
+                                    }
+                                    for (i in rowCountries.size until 3) {
+                                        Spacer(modifier = Modifier.weight(1f))
                                     }
                                 }
-                            )
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                        } else {
+                            item {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .padding(bottom = 16.dp)
+                                        .clickable { viewModel.selectRadioCountry(null) }
+                                ) {
+                                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Back to Countries", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                                }
+                                Text(
+                                    text = "Top Stations in ${viewModel.selectedRadioCountry?.name}",
+                                    color = Color.White,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(bottom = 24.dp)
+                                )
+                            }
+                            
+                            val chunkedStations = viewModel.countryStations.chunked(4)
+                            items(chunkedStations) { rowStations ->
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    for (station in rowStations) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            ModernSongCard(station) {
+                                                playerViewModel?.playRadio(station)
+                                            }
+                                        }
+                                    }
+                                    for (i in rowStations.size until 4) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(24.dp))
+                            }
+                        }
+                    } else {
+                        items(viewModel.currentCategories) { category ->
+                            val songs = viewModel.categories[category.id]
+                            if (!songs.isNullOrEmpty()) {
+                                SongCategoryRow(
+                                    category = category.title,
+                                    songs = songs,
+                                    onSongClick = { song -> playerViewModel?.playSong(song) }
+                                )
+                            }
                         }
                     }
                 }
@@ -318,5 +395,52 @@ fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
             fontWeight = FontWeight.Medium,
             fontSize = 14.sp
         )
+    }
+}
+
+@Composable
+fun CountryCard(country: com.watermelon.music.domain.model.Country, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Box(
+        modifier = modifier
+            .height(72.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFF0F251D)) // Dark slate green fallback
+            .clickable(onClick = onClick)
+    ) {
+        // Background Pattern
+        androidx.compose.foundation.Image(
+            painter = androidx.compose.ui.res.painterResource("watermelon_pattern.png"),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize().alpha(0.6f)
+        )
+        
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Flag image
+            AsyncImage(
+                model = "https://flagcdn.com/w160/${country.isoCode.lowercase()}.png",
+                contentDescription = "${country.name} flag",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Text(
+                text = country.name,
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }

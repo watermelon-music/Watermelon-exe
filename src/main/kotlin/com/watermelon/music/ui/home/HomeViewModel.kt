@@ -26,6 +26,16 @@ class HomeViewModel(
     var topHits by mutableStateOf<List<Song>>(emptyList())
         private set
 
+    // New states for Radio
+    var topGlobalRadios by mutableStateOf<List<Song>>(emptyList())
+        private set
+    var radioCountries by mutableStateOf<List<com.watermelon.music.domain.model.Country>>(emptyList())
+        private set
+    var selectedRadioCountry by mutableStateOf<com.watermelon.music.domain.model.Country?>(null)
+        private set
+    var countryStations by mutableStateOf<List<Song>>(emptyList())
+        private set
+
     enum class Filter { ALL, MUSIC, BROADCASTS, RADIO }
     var currentFilter by mutableStateOf(Filter.ALL)
         private set
@@ -37,7 +47,19 @@ class HomeViewModel(
     fun setFilter(filter: Filter) {
         if (currentFilter != filter) {
             currentFilter = filter
+            selectedRadioCountry = null
             loadData()
+        }
+    }
+
+    fun selectRadioCountry(country: com.watermelon.music.domain.model.Country?) {
+        selectedRadioCountry = country
+        if (country != null) {
+            coroutineScope.launch {
+                isLoading = true
+                countryStations = com.watermelon.music.data.remote.RadioBrowserApi.getStationsByCountry(country.name, 20)
+                isLoading = false
+            }
         }
     }
 
@@ -48,30 +70,11 @@ class HomeViewModel(
         coroutineScope.launch {
             try {
                 if (currentFilter == Filter.RADIO) {
-                    val countries = com.watermelon.music.data.remote.RadioBrowserApi.getTopCountries(15)
-                    val generatedCategories = countries.map {
-                        com.watermelon.music.domain.model.Category(
-                            id = it,
-                            title = "$it Radio",
-                            query = ""
-                        )
-                    }
-                    currentCategories = generatedCategories
-                    categories = emptyMap()
-                    
+                    val globalRadios = com.watermelon.music.data.remote.RadioBrowserApi.getTopGlobalStations(10)
+                    val countries = com.watermelon.music.data.remote.RadioBrowserApi.getTopCountries(30)
+                    topGlobalRadios = globalRadios
+                    radioCountries = countries
                     isLoading = false
-                    
-                    for (country in countries) {
-                        try {
-                            val stations = com.watermelon.music.data.remote.RadioBrowserApi.getStationsByCountry(country, 10)
-                            if (stations.isNotEmpty()) {
-                                categories = categories + (country to stations)
-                            }
-                            delay(500) // gentle delay for radio browser
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
                 } else {
                     // 1. Fetch Top Hits first based on filter
                     val query = when (currentFilter) {
