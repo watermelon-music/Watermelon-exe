@@ -47,7 +47,7 @@ fun Sidebar(navController: NavController) {
                 imageVector = Icons.Default.Add,
                 contentDescription = "Add",
                 tint = Color.White,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
         
@@ -66,7 +66,7 @@ fun Sidebar(navController: NavController) {
                 imageVector = Icons.Default.Favorite,
                 contentDescription = "Liked Songs",
                 tint = Color.White,
-                modifier = Modifier.size(16.dp) // heart to be smaller inside red circle
+                modifier = Modifier.size(24.dp)
             )
         }
     }

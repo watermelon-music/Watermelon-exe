@@ -219,7 +219,13 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                                 SongCategoryRow(
                                     category = category.title,
                                     songs = songs,
-                                    onSongClick = { song -> playerViewModel?.playSong(song) }
+                                    onSongClick = { song -> 
+                                        if (viewModel.currentFilter == HomeViewModel.Filter.BROADCASTS) {
+                                            playerViewModel?.playRadio(song)
+                                        } else {
+                                            playerViewModel?.playSong(song)
+                                        }
+                                    }
                                 )
                             }
                         }
@@ -404,7 +410,7 @@ fun CountryCard(country: com.watermelon.music.domain.model.Country, modifier: Mo
         modifier = modifier
             .height(72.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF0F251D)) // Dark slate green fallback
+            .background(Color.Black)
             .clickable(onClick = onClick)
     ) {
         // Background Pattern
@@ -423,7 +429,7 @@ fun CountryCard(country: com.watermelon.music.domain.model.Country, modifier: Mo
         ) {
             // Flag image
             AsyncImage(
-                model = "https://flagcdn.com/w160/${country.isoCode.lowercase()}.png",
+                model = "https://flagcdn.com/w320/${country.isoCode.lowercase()}.png",
                 contentDescription = "${country.name} flag",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

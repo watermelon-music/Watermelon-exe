@@ -113,23 +113,11 @@ fun WindowScope.CustomTitleBar(
             
             Spacer(modifier = Modifier.weight(1f))
             
-            // End Controls: Avatar, Window Controls
+            // End Controls: Window Controls
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Profile Avatar
-                AsyncImage(
-                    model = "https://i.pravatar.cc/150?img=11",
-                    contentDescription = "Profile",
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-                
-                Spacer(modifier = Modifier.width(8.dp))
-                
                 // Minimize
                 Icon(
                     imageVector = Icons.Default.Remove,

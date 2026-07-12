@@ -149,22 +149,34 @@ fun BottomPlayer(viewModel: PlayerViewModel) {
             }
 
             // Progress Bar
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(0.8f).padding(top = 4.dp)
-            ) {
-                Text("0:00", color = Color.Gray, fontSize = 10.sp)
-                Slider(
-                    value = progress,
-                    onValueChange = {},
-                    modifier = Modifier.weight(1f).padding(horizontal = 8.dp).height(16.dp),
-                    colors = SliderDefaults.colors(
-                        thumbColor = Color.White,
-                        activeTrackColor = Color(0xFFF6070A),
-                        inactiveTrackColor = Color(0xFF222222)
+            if (currentSong?.duration == "LIVE") {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(0.8f).padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color.Red))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("LIVE", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(0.8f).padding(top = 4.dp)
+                ) {
+                    Text("0:00", color = Color.Gray, fontSize = 10.sp)
+                    Slider(
+                        value = progress,
+                        onValueChange = {},
+                        modifier = Modifier.weight(1f).padding(horizontal = 8.dp).height(16.dp),
+                        colors = SliderDefaults.colors(
+                            thumbColor = Color.White,
+                            activeTrackColor = Color(0xFFF6070A),
+                            inactiveTrackColor = Color(0xFF222222)
+                        )
                     )
-                )
-                Text("4:12", color = Color.Gray, fontSize = 10.sp) // Dummy total time for now
+                    Text(currentSong?.duration ?: "4:12", color = Color.Gray, fontSize = 10.sp)
+                }
             }
         }
 

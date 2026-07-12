@@ -103,11 +103,21 @@ class HomeViewModel(
                     currentCategories = filteredCategories
                     categories = emptyMap() // Reset categories
                     
-                    for (cat in filteredCategories) {
+                    for (category in filteredCategories) {
                         try {
-                            val songs = repository.search(cat.query).take(8)
-                            categories = categories + (cat.id to songs)
-                            delay(1500) // 1.5s delay to space out API requests
+                            if (currentFilter == Filter.BROADCASTS) {
+                                // For broadcasts, fetch from RadioBrowserApi using tags instead of YouTube
+                                val stations = com.watermelon.music.data.remote.RadioBrowserApi.getStationsByTag(category.id, 10)
+                                if (stations.isNotEmpty()) {
+                                    categories = categories + (category.id to stations)
+                                }
+                            } else {
+                                // For music, search via YouTube repository
+                                val songs = repository.search(category.query).take(10)
+                                if (songs.isNotEmpty()) {
+                                    categories = categories + (category.id to songs)
+                                }
+                            }
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }

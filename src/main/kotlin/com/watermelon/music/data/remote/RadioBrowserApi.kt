@@ -87,16 +87,26 @@ object RadioBrowserApi {
     }
 
     suspend fun getStationsByCountry(country: String, limit: Int = 10): List<Song> = withContext(Dispatchers.IO) {
-        // order by votes to get the best/most popular stations in that country
         val encodedCountry = java.net.URLEncoder.encode(country, "UTF-8")
-        // Use normal bycountry endpoint instead of exact/ to avoid 404 errors on long country names
         val request = Request.Builder()
             .url("$BASE_URL/stations/bycountry/$encodedCountry?limit=$limit&order=votes&reverse=true")
             .build()
+        executeStationRequest(request)
+    }
+
+    suspend fun getStationsByTag(tag: String, limit: Int = 10): List<Song> = withContext(Dispatchers.IO) {
+        val encodedTag = java.net.URLEncoder.encode(tag, "UTF-8")
+        val request = Request.Builder()
+            .url("$BASE_URL/stations/bytag/$encodedTag?limit=$limit&order=votes&reverse=true")
+            .build()
+        executeStationRequest(request)
+    }
+
+    private fun executeStationRequest(request: Request): List<Song> {
         try {
             client.newCall(request).execute().use { response ->
                 val body = response.body?.string()
-                if (body.isNullOrBlank()) return@withContext emptyList()
+                if (body.isNullOrBlank()) return emptyList()
                 
                 val jsonArray = Json.parseToJsonElement(body).jsonArray
                 val stations = mutableListOf<Song>()
@@ -108,20 +118,20 @@ object RadioBrowserApi {
                     if (streamUrl.isNotBlank()) {
                         stations.add(
                             Song(
-                                id = streamUrl, // We store the stream URL as the ID so we can play it directly!
+                                id = streamUrl,
                                 title = obj["name"]?.jsonPrimitive?.content?.trim() ?: "Unknown Station",
-                                artist = country,
+                                artist = obj["country"]?.jsonPrimitive?.content ?: "Live Radio",
                                 thumbnail = obj["favicon"]?.jsonPrimitive?.content ?: "",
                                 duration = "LIVE"
                             )
                         )
                     }
                 }
-                stations
+                return stations
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            emptyList()
+            return emptyList()
         }
     }
 }
