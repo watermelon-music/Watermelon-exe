@@ -3,15 +3,21 @@ package com.watermelon.music.data.remote
 import com.watermelon.music.domain.model.Song
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONArray
 import java.util.concurrent.TimeUnit
 
 object RadioBrowserApi {
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .header("User-Agent", "WatermelonMusicApp/1.0")
+                .build()
+            chain.proceed(request)
+        }
         .build()
 
     // Radio Browser public endpoints usually have multiple mirrors, de1 is generally stable.
@@ -24,11 +30,11 @@ object RadioBrowserApi {
         try {
             client.newCall(request).execute().use { response ->
                 val body = response.body?.string() ?: return@withContext emptyList()
-                val jsonArray = JSONArray(body)
+                val jsonArray = Json.parseToJsonElement(body).jsonArray
                 val countries = mutableListOf<String>()
-                for (i in 0 until jsonArray.length()) {
-                    val obj = jsonArray.getJSONObject(i)
-                    countries.add(obj.getString("name"))
+                for (item in jsonArray) {
+                    val obj = item.jsonObject
+                    countries.add(obj["name"]?.jsonPrimitive?.content ?: "")
                 }
                 countries
             }
@@ -47,20 +53,20 @@ object RadioBrowserApi {
         try {
             client.newCall(request).execute().use { response ->
                 val body = response.body?.string() ?: return@withContext emptyList()
-                val jsonArray = JSONArray(body)
+                val jsonArray = Json.parseToJsonElement(body).jsonArray
                 val stations = mutableListOf<Song>()
-                for (i in 0 until jsonArray.length()) {
-                    val obj = jsonArray.getJSONObject(i)
-                    var streamUrl = obj.optString("url_resolved", "")
-                    if (streamUrl.isBlank()) streamUrl = obj.optString("url", "")
+                for (item in jsonArray) {
+                    val obj = item.jsonObject
+                    var streamUrl = obj["url_resolved"]?.jsonPrimitive?.content ?: ""
+                    if (streamUrl.isBlank()) streamUrl = obj["url"]?.jsonPrimitive?.content ?: ""
                     
                     if (streamUrl.isNotBlank()) {
                         stations.add(
                             Song(
                                 id = streamUrl, // We store the stream URL as the ID so we can play it directly!
-                                title = obj.optString("name", "Unknown Station").trim(),
+                                title = obj["name"]?.jsonPrimitive?.content?.trim() ?: "Unknown Station",
                                 artist = country,
-                                thumbnail = obj.optString("favicon", ""),
+                                thumbnail = obj["favicon"]?.jsonPrimitive?.content ?: "",
                                 duration = "LIVE"
                             )
                         )

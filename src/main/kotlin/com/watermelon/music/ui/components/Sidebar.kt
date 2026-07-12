@@ -29,7 +29,7 @@ fun Sidebar(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxHeight()
-            .width(64.dp)
+            .width(72.dp)
             .background(Color(0xFF050505)) // Pitch Black
             .padding(vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -37,7 +37,7 @@ fun Sidebar(navController: NavController) {
         // Plus Button
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(Color(0xFF1E1E1E))
                 .clickable { /* Add new playlist */ },
@@ -47,7 +47,7 @@ fun Sidebar(navController: NavController) {
                 imageVector = Icons.Default.Add,
                 contentDescription = "Add",
                 tint = Color.White,
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(16.dp)
             )
         }
         
@@ -56,7 +56,7 @@ fun Sidebar(navController: NavController) {
         // Liked Songs (Heart)
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(Color(0xFFF6070A))
                 .clickable { navController.navigate(Screen.Library) },
@@ -66,7 +66,7 @@ fun Sidebar(navController: NavController) {
                 imageVector = Icons.Default.Favorite,
                 contentDescription = "Liked Songs",
                 tint = Color.White,
-                modifier = Modifier.size(24.dp) // heart to be smaller inside red circle
+                modifier = Modifier.size(16.dp) // heart to be smaller inside red circle
             )
         }
     }
