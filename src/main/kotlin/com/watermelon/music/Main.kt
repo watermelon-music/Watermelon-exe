@@ -93,9 +93,11 @@ fun main() = application {
     }
     
     val playerViewModel = remember { PlayerViewModel() }
+    val windowState = androidx.compose.ui.window.rememberWindowState()
 
     Window(
         onCloseRequest = ::exitApplication,
+        state = windowState,
         title = "Watermelon",
         undecorated = true,
         onPreviewKeyEvent = { event ->
@@ -120,6 +122,12 @@ fun main() = application {
             }
         }
     ) {
-        App(playerViewModel)
+        Column(modifier = Modifier.fillMaxSize()) {
+            com.watermelon.music.ui.components.CustomTitleBar(
+                state = windowState,
+                onClose = ::exitApplication
+            )
+            App(playerViewModel)
+        }
     }
 }
