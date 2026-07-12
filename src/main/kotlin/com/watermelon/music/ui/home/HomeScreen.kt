@@ -201,7 +201,7 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                                     for (station in rowStations) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             ModernSongCard(station) {
-                                                playerViewModel?.playRadio(station)
+                                                playerViewModel?.playRadio(station, viewModel.countryStations)
                                             }
                                         }
                                     }
@@ -216,17 +216,23 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                         items(viewModel.currentCategories) { category ->
                             val songs = viewModel.categories[category.id]
                             if (!songs.isNullOrEmpty()) {
-                                SongCategoryRow(
-                                    category = category.title,
-                                    songs = songs,
-                                    onSongClick = { song -> 
-                                        if (viewModel.currentFilter == HomeViewModel.Filter.BROADCASTS) {
-                                            playerViewModel?.playRadio(song)
-                                        } else {
-                                            playerViewModel?.playSong(song)
+                                if (viewModel.currentFilter == HomeViewModel.Filter.BROADCASTS) {
+                                    SexyBroadcastSection(
+                                        category = category.title,
+                                        songs = songs,
+                                        onSongClick = { song -> 
+                                            playerViewModel?.playRadio(song, songs)
                                         }
-                                    }
-                                )
+                                    )
+                                } else {
+                                    SongCategoryRow(
+                                        category = category.title,
+                                        songs = songs,
+                                        onSongClick = { song -> 
+                                            playerViewModel?.playSong(song, songs)
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -385,6 +391,90 @@ fun SongCategoryRow(category: String, songs: List<Song>, onSongClick: (Song) -> 
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SexyBroadcastSection(category: String, songs: List<Song>, onSongClick: (Song) -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp)) {
+        Text(
+            text = category,
+            color = Color.White,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            maxItemsInEachRow = 3
+        ) {
+            for (song in songs.take(6)) {
+                BroadcastCard(
+                    song = song,
+                    modifier = Modifier.weight(1f),
+                    onClick = { onSongClick(song) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BroadcastCard(song: Song, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Box(
+        modifier = modifier
+            .height(140.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+    ) {
+        AsyncImage(
+            model = song.thumbnail,
+            contentDescription = "Cover",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize().background(Color(0xFF1E1E1E))
+        )
+        
+        // Dark gradient overlay from bottom up
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.9f))
+                    )
+                )
+        )
+        
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            Text(
+                text = song.title,
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFFF6070A)))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "LIVE NOW",
+                    color = Color(0xFFF6070A),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
@@ -408,15 +498,19 @@ fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
 fun CountryCard(country: com.watermelon.music.domain.model.Country, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
         modifier = modifier
-            .height(72.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.Black)
+            .height(96.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                Brush.horizontalGradient(
+                    colors = listOf(Color(0xFF1A1A24), Color(0xFF101015))
+                )
+            )
             .clickable(onClick = onClick)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Flag image
@@ -425,8 +519,8 @@ fun CountryCard(country: com.watermelon.music.domain.model.Country, modifier: Mo
                 contentDescription = "${country.name} flag",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .size(48.dp)
+                    .clip(CircleShape)
             )
             
             Spacer(modifier = Modifier.width(16.dp))
@@ -435,9 +529,18 @@ fun CountryCard(country: com.watermelon.music.domain.model.Country, modifier: Mo
                 text = country.name,
                 color = Color.White,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
+            )
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Go",
+                tint = Color(0xFFF6070A),
+                modifier = Modifier.size(24.dp)
             )
         }
     }

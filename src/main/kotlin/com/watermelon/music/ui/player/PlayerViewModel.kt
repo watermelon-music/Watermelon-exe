@@ -31,7 +31,16 @@ class PlayerViewModel {
     private val _recommendedSongs = MutableStateFlow<List<Song>>(emptyList())
     val recommendedSongs: StateFlow<List<Song>> = _recommendedSongs.asStateFlow()
 
-    fun playSong(song: Song) {
+    // Queue logic
+    private val _currentQueue = MutableStateFlow<List<Song>>(emptyList())
+    val currentQueue: StateFlow<List<Song>> = _currentQueue.asStateFlow()
+    
+    private var currentIndex = -1
+
+    fun playSong(song: Song, queue: List<Song> = emptyList()) {
+        _currentQueue.value = queue
+        currentIndex = queue.indexOf(song)
+        
         scope.launch {
             _isLoading.value = true
             
@@ -59,13 +68,43 @@ class PlayerViewModel {
         }
     }
 
-    fun playRadio(station: Song) {
+    fun playRadio(station: Song, queue: List<Song> = emptyList()) {
+        _currentQueue.value = queue
+        currentIndex = queue.indexOf(station)
+        
         scope.launch {
             _isLoading.value = true
-            // The stream URL is stored in the ID for Radio Stations
             val audioUrl = station.id
             _isLoading.value = false
             AudioPlayer.play(station, audioUrl)
+        }
+    }
+
+    fun playNext() {
+        if (_currentQueue.value.isEmpty() || currentIndex == -1) return
+        
+        if (currentIndex < _currentQueue.value.size - 1) {
+            currentIndex++
+            val nextSong = _currentQueue.value[currentIndex]
+            if (nextSong.duration == "LIVE") {
+                playRadio(nextSong, _currentQueue.value)
+            } else {
+                playSong(nextSong, _currentQueue.value)
+            }
+        }
+    }
+
+    fun playPrevious() {
+        if (_currentQueue.value.isEmpty() || currentIndex == -1) return
+        
+        if (currentIndex > 0) {
+            currentIndex--
+            val prevSong = _currentQueue.value[currentIndex]
+            if (prevSong.duration == "LIVE") {
+                playRadio(prevSong, _currentQueue.value)
+            } else {
+                playSong(prevSong, _currentQueue.value)
+            }
         }
     }
 

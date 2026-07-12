@@ -112,7 +112,7 @@ fun BottomPlayer(viewModel: PlayerViewModel) {
                     imageVector = Icons.Default.SkipPrevious,
                     contentDescription = "Previous",
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp).clickable { viewModel.playPrevious() }
                 )
                 Box(
                     modifier = Modifier
@@ -138,7 +138,7 @@ fun BottomPlayer(viewModel: PlayerViewModel) {
                     imageVector = Icons.Default.SkipNext,
                     contentDescription = "Next",
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp).clickable { viewModel.playNext() }
                 )
                 Icon(
                     imageVector = Icons.Default.Repeat,
