@@ -97,6 +97,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "Watermelon",
+        undecorated = true,
         onPreviewKeyEvent = { event ->
             if (event.type == KeyEventType.KeyDown) {
                 when (event.key) {

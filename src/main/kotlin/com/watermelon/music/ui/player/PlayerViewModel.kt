@@ -11,6 +11,7 @@ import org.schabi.newpipe.extractor.stream.StreamExtractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.watermelon.music.data.repository.MusicCatalogRepository
 
 class PlayerViewModel {
     private val scope = CoroutineScope(Dispatchers.Main)
@@ -25,9 +26,23 @@ class PlayerViewModel {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val repository = MusicCatalogRepository()
+    
+    private val _recommendedSongs = MutableStateFlow<List<Song>>(emptyList())
+    val recommendedSongs: StateFlow<List<Song>> = _recommendedSongs.asStateFlow()
+
     fun playSong(song: Song) {
         scope.launch {
             _isLoading.value = true
+            
+            // Fetch recommendations asynchronously
+            launch(Dispatchers.IO) {
+                try {
+                    _recommendedSongs.value = repository.search("similar to ${song.artist} ${song.title}").take(4)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
             
             val audioUrl = try {
                 com.watermelon.music.data.remote.youtube.LocalAudioExtractor.extractAudioUrl(song.id)

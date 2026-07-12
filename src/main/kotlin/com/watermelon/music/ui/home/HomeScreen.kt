@@ -72,7 +72,7 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                     Text(
                         text = "Watermelon",
                         color = Color(0xFFF6070A), // Dark Red/Watermelon color
-                        fontSize = 36.sp, // Made much bigger
+                        fontSize = 48.sp, // Much bigger as requested
                         fontWeight = FontWeight.ExtraBold
                     )
                     
@@ -104,9 +104,15 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                     // FILTER CHIPS
                     item {
                         Row(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FilterChip(text = "All", isSelected = true)
-                            FilterChip(text = "Music", isSelected = false)
-                            FilterChip(text = "Podcasts", isSelected = false)
+                            FilterChip(text = "All", isSelected = viewModel.currentFilter == HomeViewModel.Filter.ALL) {
+                                viewModel.setFilter(HomeViewModel.Filter.ALL)
+                            }
+                            FilterChip(text = "Music", isSelected = viewModel.currentFilter == HomeViewModel.Filter.MUSIC) {
+                                viewModel.setFilter(HomeViewModel.Filter.MUSIC)
+                            }
+                            FilterChip(text = "Podcasts", isSelected = viewModel.currentFilter == HomeViewModel.Filter.PODCASTS) {
+                                viewModel.setFilter(HomeViewModel.Filter.PODCASTS)
+                            }
                         }
                     }
 
@@ -224,7 +230,7 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
 fun ModernSongCard(song: Song, onClick: () -> Unit) {
     Column(
         modifier = Modifier
-            .width(165.dp)
+            .width(130.dp) // Rescaled from 165.dp to make UI tighter/denser
             .clickable(onClick = onClick)
     ) {
         AsyncImage(
@@ -286,12 +292,12 @@ fun SongCategoryRow(category: String, songs: List<Song>, playerViewModel: Player
 }
 
 @Composable
-fun FilterChip(text: String, isSelected: Boolean) {
+fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(24.dp))
             .background(if (isSelected) Color.White else Color(0xFF111111))
-            .clickable {}
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {

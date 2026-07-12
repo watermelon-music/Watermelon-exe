@@ -28,6 +28,7 @@ import com.watermelon.music.ui.player.PlayerViewModel
 @Composable
 fun RightPanel(playerViewModel: PlayerViewModel) {
     val currentSong by playerViewModel.currentSong.collectAsState()
+    val recommendedSongs by playerViewModel.recommendedSongs.collectAsState()
 
     Column(
         modifier = Modifier
@@ -107,37 +108,43 @@ fun RightPanel(playerViewModel: PlayerViewModel) {
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
                     
-                    // Dummy recommended songs
-                    repeat(4) { index ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                                .clickable { },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            AsyncImage(
-                                model = "https://i.scdn.co/image/ab67616d0000b273db16e53c7a02c5c99dd1844b", // Placeholder
-                                contentDescription = "Song",
-                                contentScale = ContentScale.Crop,
+                    // Real recommended songs
+                    if (recommendedSongs.isEmpty()) {
+                        Text("Loading recommendations...", color = Color.Gray, fontSize = 12.sp)
+                    } else {
+                        recommendedSongs.forEach { recSong ->
+                            Row(
                                 modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Similar Song ${index + 1}",
-                                    color = Color.White,
-                                    fontSize = 14.sp,
-                                    maxLines = 1
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                                    .clickable { playerViewModel.playSong(recSong) },
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                AsyncImage(
+                                    model = recSong.thumbnail,
+                                    contentDescription = "Song",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(4.dp))
                                 )
-                                Text(
-                                    text = "Similar Artist",
-                                    color = Color.Gray,
-                                    fontSize = 12.sp,
-                                    maxLines = 1
-                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = recSong.title,
+                                        color = Color.White,
+                                        fontSize = 14.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = recSong.artist,
+                                        color = Color.Gray,
+                                        fontSize = 12.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             }
                         }
                     }
