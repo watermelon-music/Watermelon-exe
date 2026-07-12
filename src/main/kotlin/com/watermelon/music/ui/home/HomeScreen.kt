@@ -192,6 +192,44 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                 Spacer(modifier = Modifier.height(24.dp))
                             }
                         }
+                    } else if (viewModel.currentFilter == HomeViewModel.Filter.ALL) {
+                        item { AdBannerPlaceholder() }
+                        // Show Radio in ALL
+                        if (viewModel.topGlobalRadios.isNotEmpty()) {
+                            item {
+                                SongCategoryRow(
+                                    category = "Radio Stations",
+                                    songs = viewModel.topGlobalRadios.take(6),
+                                    onSongClick = { song -> playerViewModel?.playRadio(song) }
+                                )
+                            }
+                        }
+                        // Show Broadcasts in ALL
+                        val broadcasts = viewModel.categories["broadcasts"] ?: emptyList()
+                        if (broadcasts.isNotEmpty()) {
+                            item {
+                                SexyBroadcastSection(
+                                    category = "Top Broadcasts",
+                                    songs = broadcasts.take(5),
+                                    onSongClick = { song -> playerViewModel?.playRadio(song, broadcasts) }
+                                )
+                            }
+                        }
+                        item { AdBannerPlaceholder() }
+                        // Show standard categories
+                        items(viewModel.currentCategories.filter { it.id != "broadcasts" }) { category ->
+                            val songs = viewModel.categories[category.id]
+                            if (!songs.isNullOrEmpty()) {
+                                SongCategoryRow(
+                                    category = category.title,
+                                    songs = songs,
+                                    onSongClick = { song -> 
+                                        playerViewModel?.playSong(song, songs)
+                                    }
+                                )
+                            }
+                        }
+                        item { AdBannerPlaceholder() }
                     } else {
                         items(viewModel.currentCategories) { category ->
                             val songs = viewModel.categories[category.id]
@@ -459,7 +497,7 @@ fun BroadcastCard(song: Song, modifier: Modifier = Modifier, onClick: () -> Unit
 fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp)) // Less rounded for a sharper look
+            .clip(CircleShape) // Fully rounded like playlist section
             .background(if (isSelected) Color(0xFFFF4040) else Color(0xFF1A1A1A)) // Use theme red instead of white
             .clickable(onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 10.dp), // Slightly larger
@@ -523,5 +561,25 @@ fun CountryCard(country: com.watermelon.music.domain.model.Country, modifier: Mo
                 modifier = Modifier.size(24.dp)
             )
         }
+    }
+}
+
+@Composable
+fun AdBannerPlaceholder() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .padding(vertical = 16.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color(0xFF222222)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "AdMob Space",
+            color = Color.Gray,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }

@@ -6,15 +6,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
-import androidx.compose.material.Slider
-import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.automirrored.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -202,6 +200,14 @@ fun BottomPlayer(viewModel: PlayerViewModel, onFullScreenToggle: () -> Unit) {
                     activeTrackColor = Color.White,
                     inactiveTrackColor = Color(0xFF222222)
                 )
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            var isLiked by remember { mutableStateOf(false) }
+            Icon(
+                imageVector = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Like",
+                tint = if (isLiked) Color.Red else Color.Gray,
+                modifier = Modifier.size(20.dp).clickable { isLiked = !isLiked }
             )
             Spacer(modifier = Modifier.width(16.dp))
             Icon(

@@ -60,7 +60,8 @@ class PlayerViewModel {
             // Fetch recommendations asynchronously
             launch(Dispatchers.IO) {
                 try {
-                    _recommendedSongs.value = repository.search("similar to ${song.artist} ${song.title}").take(7)
+                    val results = repository.search("${song.artist} top songs").filter { it.id != song.id }
+                    _recommendedSongs.value = results.take(7)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
