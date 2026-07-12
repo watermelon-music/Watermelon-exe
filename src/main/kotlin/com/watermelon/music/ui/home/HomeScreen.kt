@@ -42,15 +42,50 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.watermelon.music.data.PremiumManager
+import com.watermelon.music.data.LibraryEngine
 import com.watermelon.music.domain.model.Song
 import com.watermelon.music.navigation.NavController
 import com.watermelon.music.navigation.Screen
+import com.watermelon.music.ui.components.SongActionDialog
 import com.watermelon.music.ui.player.PlayerViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
     val viewModel = remember { HomeViewModel() }
+
+    var selectedActionSong by remember { mutableStateOf<Song?>(null) }
+    var isBroadcastAction by remember { mutableStateOf(false) }
+    var actionSongsList by remember { mutableStateOf<List<Song>?>(null) }
+    
+    if (selectedActionSong != null) {
+        SongActionDialog(
+            song = selectedActionSong!!,
+            isRadioOrBroadcast = isBroadcastAction,
+            onDismiss = { selectedActionSong = null },
+            onPlay = {
+                if (isBroadcastAction) {
+                    if (actionSongsList != null) {
+                        playerViewModel?.playRadio(selectedActionSong!!, actionSongsList!!)
+                    } else {
+                        playerViewModel?.playRadio(selectedActionSong!!)
+                    }
+                } else {
+                    if (actionSongsList != null) {
+                        playerViewModel?.playSong(selectedActionSong!!, actionSongsList!!)
+                    } else {
+                        playerViewModel?.playSong(selectedActionSong!!)
+                    }
+                }
+            },
+            onLike = {
+                LibraryEngine.toggleLike(selectedActionSong!!)
+            },
+            onAddToPlaylist = {
+                // Future expansion: Open playlist selector
+            }
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF000000))) {
         if (viewModel.isLoading) {
@@ -201,7 +236,11 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                 SongCategoryRow(
                                     category = "Radio Stations",
                                     songs = viewModel.topGlobalRadios.take(6),
-                                    onSongClick = { song -> playerViewModel?.playRadio(song) }
+                                    onSongClick = { song -> 
+                                        selectedActionSong = song
+                                        isBroadcastAction = true
+                                        actionSongsList = null
+                                    }
                                 )
                             }
                         }
@@ -212,7 +251,11 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                 SexyBroadcastSection(
                                     category = "Top Broadcasts",
                                     songs = broadcasts.take(5),
-                                    onSongClick = { song -> playerViewModel?.playRadio(song, broadcasts) }
+                                    onSongClick = { song -> 
+                                        selectedActionSong = song
+                                        isBroadcastAction = true
+                                        actionSongsList = broadcasts
+                                    }
                                 )
                             }
                         }
@@ -225,7 +268,9 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                     category = category.title,
                                     songs = songs,
                                     onSongClick = { song -> 
-                                        playerViewModel?.playSong(song, songs)
+                                        selectedActionSong = song
+                                        isBroadcastAction = false
+                                        actionSongsList = songs
                                     }
                                 )
                             }
@@ -241,7 +286,9 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                         category = category.title,
                                         songs = songs,
                                         onSongClick = { song -> 
-                                            playerViewModel?.playRadio(song, songs)
+                                            selectedActionSong = song
+                                            isBroadcastAction = true
+                                            actionSongsList = songs
                                         }
                                     )
                                 } else {
@@ -249,7 +296,9 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                         category = category.title,
                                         songs = songs,
                                         onSongClick = { song -> 
-                                            playerViewModel?.playSong(song, songs)
+                                            selectedActionSong = song
+                                            isBroadcastAction = false
+                                            actionSongsList = songs
                                         }
                                     )
                                 }
@@ -298,12 +347,18 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
         AsyncImage(
             model = currentSong.thumbnail,
             contentDescription = "Concert",
-            contentScale = ContentScale.Fit, // Don't crop heavily
+            contentScale = ContentScale.Crop, // Fill the rectangle
             alignment = Alignment.Center, 
             modifier = Modifier.fillMaxSize()
         )
-        // Dark Overlay for readability
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.6f)))
+        // Dark Gradient Overlay for readability (darker on left)
+        Box(
+            modifier = Modifier.fillMaxSize().background(
+                Brush.horizontalGradient(
+                    colors = listOf(Color.Black.copy(alpha = 0.9f), Color.Black.copy(alpha = 0.3f), Color.Transparent)
+                )
+            )
+        )
         
         // Content
         Column(

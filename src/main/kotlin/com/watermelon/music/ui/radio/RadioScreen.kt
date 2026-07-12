@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
@@ -26,6 +27,8 @@ import coil3.compose.AsyncImage
 import com.watermelon.music.data.repository.MusicCatalogRepository
 import com.watermelon.music.domain.model.Song
 import com.watermelon.music.ui.home.AdBannerPlaceholder
+import com.watermelon.music.data.LibraryEngine
+import com.watermelon.music.ui.components.SongActionDialog
 import com.watermelon.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
 
@@ -50,6 +53,22 @@ fun RadioScreen(playerViewModel: PlayerViewModel?) {
                 playerViewModel?.playSong(fetched.first())
             }
         }
+    }
+
+    var selectedActionSong by remember { mutableStateOf<Song?>(null) }
+
+    if (selectedActionSong != null) {
+        SongActionDialog(
+            song = selectedActionSong!!,
+            isRadioOrBroadcast = true, // Everything here is radio
+            onDismiss = { selectedActionSong = null },
+            onPlay = {
+                playerViewModel?.playSong(selectedActionSong!!) // or playRadio
+            },
+            onLike = {
+                LibraryEngine.toggleLike(selectedActionSong!!)
+            }
+        )
     }
 
     Column(
@@ -82,9 +101,13 @@ fun RadioScreen(playerViewModel: PlayerViewModel?) {
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(radioSongs) { song ->
+                itemsIndexed(radioSongs) { index, song ->
+                    if (index > 0 && index % 5 == 0) {
+                        AdBannerPlaceholder()
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                     RadioSongRow(song) {
-                        playerViewModel?.playSong(song)
+                        selectedActionSong = song
                     }
                 }
             }
