@@ -113,12 +113,17 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                             FilterChip(text = "Broadcast", isSelected = viewModel.currentFilter == HomeViewModel.Filter.BROADCASTS) {
                                 viewModel.setFilter(HomeViewModel.Filter.BROADCASTS)
                             }
+                            FilterChip(text = "Radio", isSelected = viewModel.currentFilter == HomeViewModel.Filter.RADIO) {
+                                viewModel.setFilter(HomeViewModel.Filter.RADIO)
+                            }
                         }
                     }
 
                     // HERO BANNER
-                    item {
-                        HeroBanner(viewModel, playerViewModel)
+                    if (viewModel.currentFilter != HomeViewModel.Filter.RADIO) {
+                        item {
+                            HeroBanner(viewModel, playerViewModel)
+                        }
                     }
 
                     // No Recommended Row anymore, jump straight to Categories
@@ -132,7 +137,13 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                             SongCategoryRow(
                                 category = category.title,
                                 songs = songs,
-                                playerViewModel = playerViewModel
+                                onSongClick = { song ->
+                                    if (viewModel.currentFilter == HomeViewModel.Filter.RADIO) {
+                                        playerViewModel?.playRadio(song)
+                                    } else {
+                                        playerViewModel?.playSong(song)
+                                    }
+                                }
                             )
                         }
                     }
@@ -268,7 +279,7 @@ fun ModernSongCard(song: Song, onClick: () -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SongCategoryRow(category: String, songs: List<Song>, playerViewModel: PlayerViewModel?) {
+fun SongCategoryRow(category: String, songs: List<Song>, onSongClick: (Song) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = category,
@@ -283,7 +294,7 @@ fun SongCategoryRow(category: String, songs: List<Song>, playerViewModel: Player
         ) {
             items(songs) { song ->
                 ModernSongCard(song) {
-                    playerViewModel?.playSong(song)
+                    onSongClick(song)
                 }
             }
         }

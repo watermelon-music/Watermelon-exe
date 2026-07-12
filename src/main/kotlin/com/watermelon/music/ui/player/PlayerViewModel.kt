@@ -59,6 +59,16 @@ class PlayerViewModel {
         }
     }
 
+    fun playRadio(station: Song) {
+        scope.launch {
+            _isLoading.value = true
+            // The stream URL is stored in the ID for Radio Stations
+            val audioUrl = station.id
+            _isLoading.value = false
+            AudioPlayer.play(station, audioUrl)
+        }
+    }
+
     fun toggleLike() {
         val song = currentSong.value
         if (song != null) {
