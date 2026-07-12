@@ -408,10 +408,10 @@ fun BroadcastCard(song: Song, modifier: Modifier = Modifier, onClick: () -> Unit
             .clickable(onClick = onClick)
     ) {
         AsyncImage(
-            model = song.thumbnail,
+            model = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=3840&auto=format&fit=crop", // Stunning 4K DJ/Music placeholder for all broadcasts
             contentDescription = "Cover",
-            contentScale = ContentScale.Fit, // Use Fit to not stretch tiny favicons
-            modifier = Modifier.fillMaxSize().background(Color(0xFF1E1E1E)).padding(32.dp) // Add padding so it doesn't look weird
+            contentScale = ContentScale.Crop, // Fill perfectly
+            modifier = Modifier.fillMaxSize().background(Color(0xFF1E1E1E))
         )
         
         // Dark gradient overlay from bottom up

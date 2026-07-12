@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Window
@@ -126,20 +127,28 @@ fun main() = application {
             }
         }
     ) {
-        var isRightPanelVisible by remember { mutableStateOf(true) }
+        var isRightPanelVisible by remember { mutableStateOf(false) } // Default to false until a song is played
         val navController = remember { NavController(Screen.Home) }
+        
+        // Observe current song and show right panel when it changes
+        val currentSong by playerViewModel.currentSong.collectAsState()
+        androidx.compose.runtime.LaunchedEffect(currentSong) {
+            if (currentSong != null) {
+                isRightPanelVisible = true
+            }
+        }
+        
         Column(modifier = Modifier.fillMaxSize()) {
             CustomTitleBar(
                 state = windowState,
                 onClose = ::exitApplication,
-                navController = navController,
-                onToggleRightPanel = { isRightPanelVisible = !isRightPanelVisible }
+                navController = navController
             )
             App(
                 playerViewModel = playerViewModel,
                 navController = navController,
                 isRightPanelVisible = isRightPanelVisible,
-                onToggleRightPanel = { isRightPanelVisible = !isRightPanelVisible }
+                onToggleRightPanel = { isRightPanelVisible = false } // Only close it now
             )
         }
     }

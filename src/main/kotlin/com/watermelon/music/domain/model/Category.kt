@@ -7,12 +7,12 @@ data class Category(
 )
 
 val HOME_CATEGORIES = listOf(
-    Category("hollywood", "🎬 Hollywood", "english trending songs"),
-    Category("bollywood", "🎥 Bollywood", "bollywood trending songs"),
-    Category("pop", "🎤 Pop", "pop music trending"),
-    Category("rock", "🎸 Rock", "rock music"),
-    Category("jazz", "🎷 Jazz & Blues", "jazz music"),
-    Category("classical", "🎼 Classical", "classical music"),
-    Category("hiphop", "🎧 Hip-Hop", "hip hop music"),
-    Category("electronic", "⚡ Electronic", "electronic music")
+    Category("hollywood", "Hollywood", "english trending songs"),
+    Category("bollywood", "Bollywood", "bollywood trending songs"),
+    Category("pop", "Pop", "pop music trending"),
+    Category("rock", "Rock", "rock music"),
+    Category("jazz", "Jazz & Blues", "jazz music"),
+    Category("classical", "Classical", "classical music"),
+    Category("hiphop", "Hip-Hop", "hip hop music"),
+    Category("electronic", "Electronic", "electronic music")
 )
