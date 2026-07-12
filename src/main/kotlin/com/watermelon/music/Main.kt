@@ -39,18 +39,22 @@ import androidx.compose.ui.input.key.*
 @Composable
 @Preview
 fun App(playerViewModel: PlayerViewModel, navController: NavController, isRightPanelVisible: Boolean, onToggleRightPanel: () -> Unit) {
+    var isFullScreenMode by remember { mutableStateOf(false) }
 
     MaterialTheme {
         Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
             // Main content area with Sidebar
             Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                // Only show Sidebar if not Splash or Login
-                if (navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
-                    Sidebar(navController)
-                }
+                if (isFullScreenMode) {
+                    com.watermelon.music.ui.player.FullScreenPlayerScreen(playerViewModel)
+                } else {
+                    // Only show Sidebar if not Splash or Login
+                    if (navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
+                        Sidebar(navController)
+                    }
 
-                // Dynamic Screen Content
-                Box(modifier = Modifier.weight(1f).fillMaxSize()) {
+                    // Dynamic Screen Content
+                    Box(modifier = Modifier.weight(1f).fillMaxSize()) {
                     when (navController.currentScreen) {
                         is Screen.Splash -> {
                             // Splash UI
@@ -75,18 +79,18 @@ fun App(playerViewModel: PlayerViewModel, navController: NavController, isRightP
                         }
                         else -> {}
                     }
-                }
+                    }
+                } // Closes else
                 
                 // Right Panel (Context Panel)
-                // Right Panel (Context Panel)
-                if (navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login && isRightPanelVisible) {
+                if (isRightPanelVisible && navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
                     com.watermelon.music.ui.components.RightPanel(playerViewModel, onClose = onToggleRightPanel)
                 }
-            }
-            
-            // Bottom Player (spans full width)
+            } // Closes Row
+
+            // Bottom Player (always visible if not in Splash/Login)
             if (navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
-                BottomPlayer(playerViewModel)
+                BottomPlayer(playerViewModel, onFullScreenToggle = { isFullScreenMode = !isFullScreenMode })
             }
         }
     }

@@ -28,7 +28,7 @@ import coil3.compose.AsyncImage
 import com.watermelon.music.domain.model.Song
 
 @Composable
-fun BottomPlayer(viewModel: PlayerViewModel) {
+fun BottomPlayer(viewModel: PlayerViewModel, onFullScreenToggle: () -> Unit) {
     val currentSong by viewModel.currentSong.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
     val progress by viewModel.progress.collectAsState()
@@ -202,6 +202,13 @@ fun BottomPlayer(viewModel: PlayerViewModel) {
                     activeTrackColor = Color.White,
                     inactiveTrackColor = Color(0xFF222222)
                 )
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Icon(
+                imageVector = Icons.Default.Fullscreen,
+                contentDescription = "Full Screen",
+                tint = Color.Gray,
+                modifier = Modifier.size(20.dp).clickable { onFullScreenToggle() }
             )
         }
     }
