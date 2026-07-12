@@ -86,10 +86,10 @@ object RadioBrowserApi {
         }
     }
 
-    suspend fun getStationsByCountry(country: String, limit: Int = 10): List<Song> = withContext(Dispatchers.IO) {
-        val encodedCountry = java.net.URLEncoder.encode(country, "UTF-8")
+    suspend fun getStationsByCountryCode(countryCode: String, limit: Int = 20): List<Song> = withContext(Dispatchers.IO) {
+        val encodedCode = java.net.URLEncoder.encode(countryCode, "UTF-8")
         val request = Request.Builder()
-            .url("$BASE_URL/stations/bycountry/$encodedCountry?limit=$limit&order=votes&reverse=true")
+            .url("$BASE_URL/stations/bycountrycodeexact/$encodedCode?limit=$limit&order=votes&reverse=true")
             .build()
         executeStationRequest(request)
     }

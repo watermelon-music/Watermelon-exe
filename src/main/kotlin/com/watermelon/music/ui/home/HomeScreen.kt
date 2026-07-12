@@ -413,14 +413,6 @@ fun CountryCard(country: com.watermelon.music.domain.model.Country, modifier: Mo
             .background(Color.Black)
             .clickable(onClick = onClick)
     ) {
-        // Background Pattern
-        androidx.compose.foundation.Image(
-            painter = androidx.compose.ui.res.painterResource("watermelon_pattern.png"),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().alpha(0.6f)
-        )
-        
         Row(
             modifier = Modifier
                 .fillMaxSize()

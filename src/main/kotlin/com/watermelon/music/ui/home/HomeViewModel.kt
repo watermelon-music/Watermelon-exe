@@ -57,7 +57,7 @@ class HomeViewModel(
         if (country != null) {
             coroutineScope.launch {
                 isLoading = true
-                countryStations = com.watermelon.music.data.remote.RadioBrowserApi.getStationsByCountry(country.name, 20)
+                countryStations = com.watermelon.music.data.remote.RadioBrowserApi.getStationsByCountryCode(country.isoCode, 20)
                 isLoading = false
             }
         }
@@ -91,10 +91,12 @@ class HomeViewModel(
                     // 2. Fetch categories sequentially with delay to save server costs
                     val filteredCategories = if (currentFilter == Filter.BROADCASTS) {
                         listOf(
-                            com.watermelon.music.domain.model.Category("comedy", "Comedy Podcasts", "comedy podcast full episode"),
-                            com.watermelon.music.domain.model.Category("news", "News Broadcasts", "live news broadcast full"),
-                            com.watermelon.music.domain.model.Category("sports", "Sports Radio", "sports radio live broadcast"),
-                            com.watermelon.music.domain.model.Category("tech", "Tech & Science", "technology podcast episode")
+                            com.watermelon.music.domain.model.Category("comedy", "Comedy", "comedy"),
+                            com.watermelon.music.domain.model.Category("news", "News", "news"),
+                            com.watermelon.music.domain.model.Category("sports", "Sports", "sports"),
+                            com.watermelon.music.domain.model.Category("tech", "Tech & Science", "technology"),
+                            com.watermelon.music.domain.model.Category("business", "Business", "business"),
+                            com.watermelon.music.domain.model.Category("education", "Education", "education")
                         )
                     } else {
                         HOME_CATEGORIES
