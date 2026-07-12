@@ -29,7 +29,9 @@ object RadioBrowserApi {
             .build()
         try {
             client.newCall(request).execute().use { response ->
-                val body = response.body?.string() ?: return@withContext emptyList()
+                val body = response.body?.string()
+                if (body.isNullOrBlank()) return@withContext emptyList()
+                
                 val jsonArray = Json.parseToJsonElement(body).jsonArray
                 val countries = mutableListOf<String>()
                 for (item in jsonArray) {
@@ -47,12 +49,15 @@ object RadioBrowserApi {
     suspend fun getStationsByCountry(country: String, limit: Int = 10): List<Song> = withContext(Dispatchers.IO) {
         // order by votes to get the best/most popular stations in that country
         val encodedCountry = java.net.URLEncoder.encode(country, "UTF-8")
+        // Sometimes exact matching with spaces fails, we can just use normal bycountry endpoint instead of exact if needed, but exact is fine
         val request = Request.Builder()
             .url("$BASE_URL/stations/bycountry/exact/$encodedCountry?limit=$limit&order=votes&reverse=true")
             .build()
         try {
             client.newCall(request).execute().use { response ->
-                val body = response.body?.string() ?: return@withContext emptyList()
+                val body = response.body?.string()
+                if (body.isNullOrBlank()) return@withContext emptyList()
+                
                 val jsonArray = Json.parseToJsonElement(body).jsonArray
                 val stations = mutableListOf<Song>()
                 for (item in jsonArray) {
