@@ -67,12 +67,8 @@ fun Sidebar(navController: NavController) {
         Box(
             modifier = Modifier
                 .size(56.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(Color(0xFF6C27F8), Color(0xFFA0D1CD))
-                    )
-                )
+                .clip(CircleShape)
+                .background(Color(0xFFF6070A))
                 .clickable { navController.navigate(Screen.Library) },
             contentAlignment = Alignment.Center
         ) {
@@ -94,18 +90,7 @@ fun Sidebar(navController: NavController) {
         PlaylistIcon("https://i.scdn.co/image/ab67706c0000da84b6fbb7fc21c009d13f9c66cc")
         Spacer(modifier = Modifier.height(16.dp))
         PlaylistIcon("https://i.scdn.co/image/ab67616d0000b273db16e53c7a02c5c99dd1844b")
-        
         Spacer(modifier = Modifier.height(16.dp))
-        
-        // Circular Avatars (Friends)
-        AvatarIcon("https://i.pravatar.cc/150?img=68")
-        Spacer(modifier = Modifier.height(16.dp))
-        AvatarIcon("https://i.pravatar.cc/150?img=52")
-        Spacer(modifier = Modifier.height(16.dp))
-        AvatarIcon("https://i.pravatar.cc/150?img=12")
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
         PlaylistIcon("https://i.scdn.co/image/ab67616d0000b273ea7caaff71dea1051d49b2fe")
     }
 }

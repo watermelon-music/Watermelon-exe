@@ -38,7 +38,7 @@ fun RightPanel(playerViewModel: PlayerViewModel) {
     ) {
         // Header
         Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp), // Increased padding to avoid collapse
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -85,66 +85,61 @@ fun RightPanel(playerViewModel: PlayerViewModel) {
                 color = Color.Gray,
                 fontSize = 16.sp,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.clickable { /* Open artist page */ }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // About the artist placeholder
+            // Recommended
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFF111111)) // Slightly lighter than pitch black for contrast
             ) {
-                Column {
-                    Box(modifier = Modifier.fillMaxWidth().height(140.dp)) {
-                        AsyncImage(
-                            model = song.thumbnail, // Re-using thumbnail as a mock for artist cover
-                            contentDescription = "Artist Image",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)))
-                        Text(
-                            text = "About the artist",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(16.dp).align(Alignment.TopStart)
-                        )
-                    }
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = song.artist,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
-                            Box(
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Recommended",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                    
+                    // Dummy recommended songs
+                    repeat(4) { index ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable { },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            AsyncImage(
+                                model = "https://i.scdn.co/image/ab67616d0000b273db16e53c7a02c5c99dd1844b", // Placeholder
+                                contentDescription = "Song",
+                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .border(1.dp, Color(0xFFFF4040), RoundedCornerShape(16.dp))
-                                    .clickable {}
-                                    .padding(horizontal = 16.dp, vertical = 6.dp)
-                            ) {
-                                Text("Follow", color = Color(0xFFFF4040), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                    .size(40.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Similar Song ${index + 1}",
+                                    color = Color.White,
+                                    fontSize = 14.sp,
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = "Similar Artist",
+                                    color = Color.Gray,
+                                    fontSize = 12.sp,
+                                    maxLines = 1
+                                )
                             }
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "12,459,102 monthly listeners",
-                            color = Color.Gray,
-                            fontSize = 12.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Top trending artist this month on Watermelon Music.",
-                            color = Color.LightGray,
-                            fontSize = 12.sp,
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis
-                        )
                     }
                 }
             }
