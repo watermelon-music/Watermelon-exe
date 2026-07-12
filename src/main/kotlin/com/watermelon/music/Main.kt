@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Window
@@ -33,7 +36,7 @@ import androidx.compose.ui.input.key.*
 
 @Composable
 @Preview
-fun App(playerViewModel: PlayerViewModel, navController: NavController) {
+fun App(playerViewModel: PlayerViewModel, navController: NavController, isRightPanelVisible: Boolean, onToggleRightPanel: () -> Unit) {
 
     MaterialTheme {
         Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0F0F0F))) {
@@ -54,7 +57,7 @@ fun App(playerViewModel: PlayerViewModel, navController: NavController) {
                             LoginScreen(navController)
                         }
                         is Screen.Home -> {
-                            HomeScreen(navController, playerViewModel)
+                            HomeScreen(playerViewModel)
                         }
                         is Screen.Profile -> {
                             ProfileScreen()
@@ -70,8 +73,9 @@ fun App(playerViewModel: PlayerViewModel, navController: NavController) {
                 }
                 
                 // Right Panel (Context Panel)
-                if (navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
-                    com.watermelon.music.ui.components.RightPanel(playerViewModel)
+                // Right Panel (Context Panel)
+                if (navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login && isRightPanelVisible) {
+                    com.watermelon.music.ui.components.RightPanel(playerViewModel, onClose = onToggleRightPanel)
                 }
             }
             
@@ -122,14 +126,21 @@ fun main() = application {
             }
         }
     ) {
+        var isRightPanelVisible by remember { mutableStateOf(true) }
         val navController = remember { NavController(Screen.Home) }
         Column(modifier = Modifier.fillMaxSize()) {
             CustomTitleBar(
                 state = windowState,
                 onClose = ::exitApplication,
-                navController = navController
+                navController = navController,
+                onToggleRightPanel = { isRightPanelVisible = !isRightPanelVisible }
             )
-            App(playerViewModel, navController)
+            App(
+                playerViewModel = playerViewModel,
+                navController = navController,
+                isRightPanelVisible = isRightPanelVisible,
+                onToggleRightPanel = { isRightPanelVisible = !isRightPanelVisible }
+            )
         }
     }
 }

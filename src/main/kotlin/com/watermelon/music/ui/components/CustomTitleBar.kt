@@ -31,7 +31,8 @@ import com.watermelon.music.navigation.Screen
 fun WindowScope.CustomTitleBar(
     state: WindowState,
     onClose: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    onToggleRightPanel: () -> Unit
 ) {
     WindowDraggableArea {
         Row(
@@ -139,6 +140,14 @@ fun WindowScope.CustomTitleBar(
                         )
                     }
                 }
+                
+                // Toggle Right Panel
+                Icon(
+                    imageVector = Icons.Default.VerticalSplit,
+                    contentDescription = "Toggle Panel",
+                    tint = Color.LightGray,
+                    modifier = Modifier.size(20.dp).clickable { onToggleRightPanel() }
+                )
                 
                 Spacer(modifier = Modifier.width(16.dp))
 

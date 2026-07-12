@@ -48,7 +48,7 @@ import com.watermelon.music.ui.player.PlayerViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? = null) {
+fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
     val viewModel = remember { HomeViewModel() }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF000000))) {
@@ -310,7 +310,7 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
 fun ModernSongCard(song: Song, onClick: () -> Unit) {
     Column(
         modifier = Modifier
-            .width(130.dp) // Rescaled from 165.dp to make UI tighter/denser
+            .width(180.dp) // Make songs image bigger
             .clickable(onClick = onClick)
     ) {
         AsyncImage(
@@ -346,7 +346,6 @@ fun ModernSongCard(song: Song, onClick: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SongCategoryRow(category: String, songs: List<Song>, onSongClick: (Song) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -411,8 +410,8 @@ fun BroadcastCard(song: Song, modifier: Modifier = Modifier, onClick: () -> Unit
         AsyncImage(
             model = song.thumbnail,
             contentDescription = "Cover",
-            contentScale = ContentScale.Crop, // This ensures it fills the square beautifully
-            modifier = Modifier.fillMaxSize().background(Color(0xFF1E1E1E))
+            contentScale = ContentScale.Fit, // Use Fit to not stretch tiny favicons
+            modifier = Modifier.fillMaxSize().background(Color(0xFF1E1E1E)).padding(32.dp) // Add padding so it doesn't look weird
         )
         
         // Dark gradient overlay from bottom up

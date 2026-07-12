@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -37,7 +38,7 @@ fun ProfileScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121212))
+            .background(Color(0xFFF9F9F9)) // White theme background
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -53,7 +54,7 @@ fun ProfileScreen() {
                 Text("Back", color = Color(0xFFFF4040), fontSize = 14.sp)
             }
             Text("Profile", color = Color(0xFFFF4040), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Gray, modifier = Modifier.size(20.dp))
+            Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.DarkGray, modifier = Modifier.size(20.dp))
         }
 
         // AVATAR
@@ -62,7 +63,10 @@ fun ProfileScreen() {
                 model = "https://i.pravatar.cc/150?img=11",
                 contentDescription = "Avatar",
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().clip(CircleShape).border(2.dp, Color(0xFFFF4040), CircleShape)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .border(2.dp, Color(0xFFFF4040), CircleShape)
             )
             // Camera icon badge
             Box(
@@ -80,8 +84,8 @@ fun ProfileScreen() {
         
         Spacer(modifier = Modifier.height(12.dp))
         
-        Text("satu", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
-        Text("@Satyam Pote", color = Color.Gray, fontSize = 14.sp)
+        Text("satu", color = Color.Black, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+        Text("@Satyam Pote", color = Color.DarkGray, fontSize = 14.sp)
         
         Spacer(modifier = Modifier.height(8.dp))
         
@@ -89,8 +93,8 @@ fun ProfileScreen() {
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFF2A1515)) // Dark faint red background
-                .border(1.dp, Color(0xFFFF4040).copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                .background(Color(0xFFFFEEEE)) // Light faint red background
+                .border(1.dp, Color(0xFFFF4040).copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -104,20 +108,20 @@ fun ProfileScreen() {
         // PROGRESS SECTION
         Column(modifier = Modifier.fillMaxWidth(0.9f)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Level $currentLevel", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text("${userStats.totalXp} / ${(currentLevel * 1000)} XP", color = Color.LightGray, fontSize = 12.sp)
+                Text("Level $currentLevel", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text("${userStats.totalXp} / ${(currentLevel * 1000)} XP", color = Color.DarkGray, fontSize = 12.sp)
             }
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
                 progress = progress,
                 modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
                 color = Color(0xFFFF4040),
-                backgroundColor = Color(0xFF2A2A2A)
+                backgroundColor = Color(0xFFE0E0E0) // Light gray track
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("${(progress * 100).toInt()}% to Level ${currentLevel + 1}", color = Color.Gray, fontSize = 12.sp)
-                Text("Total songs played: $totalSongs", color = Color.Gray, fontSize = 12.sp)
+                Text("${(progress * 100).toInt()}% to Level ${currentLevel + 1}", color = Color.DarkGray, fontSize = 12.sp)
+                Text("Total songs played: $totalSongs", color = Color.DarkGray, fontSize = 12.sp)
             }
         }
 
@@ -131,11 +135,13 @@ fun ProfileScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF1E1E1E))
+                    .background(Color.White)
+                    .border(1.dp, Color(0xFFEEEEEE), RoundedCornerShape(16.dp))
             ) {
-                PreferenceItem(Icons.Default.Palette, "Theme", "Dark Watermelon")
+                PreferenceItem(Icons.Default.Palette, "Theme", "Light Watermelon")
                 PreferenceItem(Icons.Default.Share, "Share App", "Invite friends")
-                PreferenceItem(Icons.Default.Info, "About", "Watermelon v1.0.51", showDivider = false)
+                PreferenceItem(Icons.Default.Info, "About", "Watermelon v1.0.51")
+                PreferenceItem(Icons.Default.MoreHoriz, "More", "More options", showDivider = false)
             }
         }
 
@@ -147,7 +153,8 @@ fun ProfileScreen() {
                 .fillMaxWidth(0.9f)
                 .height(48.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .border(1.dp, Color(0xFF333333), RoundedCornerShape(12.dp))
+                .background(Color.White)
+                .border(1.dp, Color(0xFFDDDDDD), RoundedCornerShape(12.dp))
                 .clickable { },
             contentAlignment = Alignment.Center
         ) {
@@ -185,13 +192,13 @@ fun PreferenceItem(icon: ImageVector, title: String, subtitle: String, showDivid
             Icon(icon, contentDescription = null, tint = Color(0xFFFF4040), modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                Text(subtitle, color = Color.Gray, fontSize = 12.sp)
+                Text(title, color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(subtitle, color = Color.DarkGray, fontSize = 12.sp)
             }
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp))
         }
         if (showDivider) {
-            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFF2A2A2A)))
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFEEEEEE)))
         }
     }
 }

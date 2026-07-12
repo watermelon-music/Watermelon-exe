@@ -27,7 +27,7 @@ import coil3.compose.AsyncImage
 import com.watermelon.music.ui.player.PlayerViewModel
 
 @Composable
-fun RightPanel(playerViewModel: PlayerViewModel) {
+fun RightPanel(playerViewModel: PlayerViewModel, onClose: () -> Unit) {
     val currentSong by playerViewModel.currentSong.collectAsState()
     val recommendedSongs by playerViewModel.recommendedSongs.collectAsState()
 
@@ -52,7 +52,7 @@ fun RightPanel(playerViewModel: PlayerViewModel) {
             )
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Icon(Icons.Default.MoreHoriz, contentDescription = "Options", tint = Color.Gray, modifier = Modifier.size(20.dp).clickable {})
-                Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Gray, modifier = Modifier.size(20.dp).clickable {})
+                Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Gray, modifier = Modifier.size(20.dp).clickable { onClose() })
             }
         }
 
