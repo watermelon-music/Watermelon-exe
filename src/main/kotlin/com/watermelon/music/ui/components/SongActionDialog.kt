@@ -9,6 +9,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Lyrics
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,7 +29,8 @@ fun SongActionDialog(
     onDismiss: () -> Unit,
     onPlay: () -> Unit,
     onLike: () -> Unit,
-    onAddToPlaylist: () -> Unit = {}
+    onAddToPlaylist: () -> Unit = {},
+    onLyrics: () -> Unit = {}
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Column(
@@ -55,24 +57,30 @@ fun SongActionDialog(
             }
 
             // Like Option
-            ActionRow("Like", Icons.Default.Favorite) {
+            ActionRow("Like", Icons.Default.Favorite, tint = Color(0xFFFF4040)) {
                 onLike()
                 onDismiss()
             }
 
             // Add to Playlist (Only for normal songs)
             if (!isRadioOrBroadcast) {
-                ActionRow("Add to Playlist", Icons.AutoMirrored.Filled.PlaylistAdd) {
+                ActionRow("Add to Playlist", Icons.AutoMirrored.Filled.PlaylistAdd, tint = Color(0xFFFF4040)) {
                     onAddToPlaylist()
                     onDismiss()
                 }
+            }
+
+            // Lyrics Option
+            ActionRow("Lyrics", Icons.Default.Lyrics) {
+                onLyrics()
+                onDismiss()
             }
         }
     }
 }
 
 @Composable
-fun ActionRow(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+fun ActionRow(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector, tint: Color = Color.White, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -80,7 +88,7 @@ fun ActionRow(text: String, icon: androidx.compose.ui.graphics.vector.ImageVecto
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = text, tint = Color.White, modifier = Modifier.size(32.dp))
+        Icon(icon, contentDescription = text, tint = tint, modifier = Modifier.size(32.dp))
         Spacer(modifier = Modifier.width(16.dp))
         Text(text, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Medium)
     }

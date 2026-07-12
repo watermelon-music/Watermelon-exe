@@ -232,69 +232,58 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                         }
                     } else if (viewModel.currentFilter == HomeViewModel.Filter.ALL) {
                         item { AdBannerPlaceholder() }
-                        // Show Radio in ALL
-                        if (viewModel.topGlobalRadios.isNotEmpty()) {
-                            item {
-                                Text(
-                                    text = "Radio Stations",
-                                    color = Color.White,
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    modifier = Modifier.padding(bottom = 16.dp)
-                                )
-                                RadioGridBox(
-                                    radios = viewModel.topGlobalRadios.take(4),
-                                    onSongClick = { song -> playerViewModel?.playRadio(song) },
-                                    onSongRightClick = { song -> 
-                                        selectedActionSong = song
-                                        isBroadcastAction = true
-                                        actionSongsList = null
-                                    }
-                                )
-                                Spacer(modifier = Modifier.height(32.dp))
-                            }
-                        }
-                        // Show Broadcasts in ALL
+                        // Show Radio and Broadcasts side by side in ALL
                         val broadcasts = viewModel.categories["broadcasts"] ?: emptyList()
-                        if (broadcasts.size >= 20) {
+                        if (viewModel.topGlobalRadios.isNotEmpty() || broadcasts.isNotEmpty()) {
                             item {
-                                Text(
-                                    text = "Top Broadcasts",
-                                    color = Color.White,
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    modifier = Modifier.padding(bottom = 16.dp)
-                                )
-                                RotatingBroadcastBox(
-                                    broadcasts = broadcasts.drop(10).take(10),
-                                    onSongClick = { song -> playerViewModel?.playRadio(song, broadcasts) },
-                                    onSongRightClick = { song -> 
-                                        selectedActionSong = song
-                                        isBroadcastAction = true
-                                        actionSongsList = broadcasts
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    // Radio Side
+                                    if (viewModel.topGlobalRadios.isNotEmpty()) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = "Radio Stations",
+                                                color = Color.White,
+                                                fontSize = 20.sp,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                modifier = Modifier.padding(bottom = 12.dp)
+                                            )
+                                            RadioGridBox(
+                                                radios = viewModel.topGlobalRadios.take(4),
+                                                onSongClick = { song -> playerViewModel?.playRadio(song) },
+                                                onSongRightClick = { song -> 
+                                                    selectedActionSong = song
+                                                    isBroadcastAction = true
+                                                    actionSongsList = null
+                                                }
+                                            )
+                                        }
                                     }
-                                )
-                                Spacer(modifier = Modifier.height(32.dp))
-                            }
-                        } else if (broadcasts.isNotEmpty()) {
-                            item {
-                                Text(
-                                    text = "Top Broadcasts",
-                                    color = Color.White,
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    modifier = Modifier.padding(bottom = 16.dp)
-                                )
-                                RotatingBroadcastBox(
-                                    broadcasts = broadcasts,
-                                    onSongClick = { song -> playerViewModel?.playRadio(song, broadcasts) },
-                                    onSongRightClick = { song -> 
-                                        selectedActionSong = song
-                                        isBroadcastAction = true
-                                        actionSongsList = broadcasts
+
+                                    // Broadcast Side
+                                    if (broadcasts.isNotEmpty()) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = "Top Broadcasts",
+                                                color = Color.White,
+                                                fontSize = 20.sp,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                modifier = Modifier.padding(bottom = 12.dp)
+                                            )
+                                            RotatingBroadcastBox(
+                                                broadcasts = if (broadcasts.size >= 20) broadcasts.drop(10).take(10) else broadcasts,
+                                                onSongClick = { song -> playerViewModel?.playRadio(song, broadcasts) },
+                                                onSongRightClick = { song -> 
+                                                    selectedActionSong = song
+                                                    isBroadcastAction = true
+                                                    actionSongsList = broadcasts
+                                                }
+                                            )
+                                        }
                                     }
-                                )
-                                Spacer(modifier = Modifier.height(32.dp))
+                                }
                             }
                         }
                         item { AdBannerPlaceholder() }
@@ -626,6 +615,7 @@ fun RadioGridBox(radios: List<Song>, onSongRightClick: ((Song) -> Unit)? = null,
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(260.dp) // Matched height and reduced slightly
             .clip(RoundedCornerShape(24.dp))
             .background(Color(0xFF1E1E1E))
             .padding(16.dp)
@@ -666,7 +656,7 @@ fun RotatingBroadcastBox(broadcasts: List<Song>, onSongRightClick: ((Song) -> Un
         val song = broadcasts[index]
         BroadcastCard(
             song = song,
-            modifier = Modifier.fillMaxWidth().height(280.dp), // Make it a big box
+            modifier = Modifier.fillMaxWidth().height(260.dp), // Matched height and reduced slightly
             onSongRightClick = { onSongRightClick?.invoke(song) },
             onClick = { onSongClick(song) }
         )

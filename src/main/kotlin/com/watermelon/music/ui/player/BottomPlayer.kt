@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.watermelon.music.domain.model.Song
+import com.watermelon.music.ui.components.SongActionDialog
 
 @Composable
 fun BottomPlayer(viewModel: PlayerViewModel, onFullScreenToggle: () -> Unit) {
@@ -33,6 +34,8 @@ fun BottomPlayer(viewModel: PlayerViewModel, onFullScreenToggle: () -> Unit) {
     val volume by viewModel.volume.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val library by viewModel.library.collectAsState()
+    
+    var showActionDialog by remember { mutableStateOf(false) }
 
     if (currentSong == null) return
 
@@ -207,6 +210,25 @@ fun BottomPlayer(viewModel: PlayerViewModel, onFullScreenToggle: () -> Unit) {
                 tint = Color.Gray,
                 modifier = Modifier.size(20.dp).clickable { onFullScreenToggle() }
             )
+            Spacer(modifier = Modifier.width(16.dp))
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "More Options",
+                tint = Color.Gray,
+                modifier = Modifier.size(20.dp).clickable { showActionDialog = true }
+            )
         }
+    }
+
+    if (showActionDialog && currentSong != null) {
+        SongActionDialog(
+            song = currentSong!!,
+            isRadioOrBroadcast = false,
+            onDismiss = { showActionDialog = false },
+            onPlay = { viewModel.togglePlayPause() },
+            onLike = { viewModel.toggleLike() },
+            onAddToPlaylist = { /* Show add to playlist dialog later */ },
+            onLyrics = { onFullScreenToggle() }
+        )
     }
 }

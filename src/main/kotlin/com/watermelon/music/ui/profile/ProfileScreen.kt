@@ -49,95 +49,103 @@ fun ProfileScreen(navController: NavController) {
     ) {
         // TOP APP BAR
         Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable {}) {
-                Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Back", tint = Color(0xFFFF4040), modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Back", color = Color(0xFFFF4040), fontSize = 14.sp)
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { navController.popBackStack() }) {
+                Text("Back", color = Color(0xFFFF4040), fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
-            Text("Profile", color = Color(0xFFFF4040), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.size(20.dp)) // Removed edit option to keep it clean
+            Text("Profile", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+            Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Gray, modifier = Modifier.size(24.dp))
         }
 
-        // AVATAR
-        Box(modifier = Modifier.size(120.dp)) {
-            AsyncImage(
-                model = "https://i.pravatar.cc/150?img=11",
-                contentDescription = "Avatar",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(CircleShape)
-                    .border(2.dp, Color(0xFFFF4040), CircleShape)
-            )
-            // Camera icon badge
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .offset(x = (-4).dp, y = (-4).dp)
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFFF4040)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.CameraAlt, contentDescription = "Change Photo", tint = Color.White, modifier = Modifier.size(18.dp))
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Text("Satyam", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
-        Text("@SatyamPote", color = Color.Gray, fontSize = 14.sp)
-        
-        Spacer(modifier = Modifier.height(12.dp))
-        
-        // PREMIUM BADGE
+        // AVATAR & INFO SECTION
         Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFF2A1515)) // Dark faint red background
-                .border(1.dp, Color(0xFFFF4040).copy(alpha = 0.5f), RoundedCornerShape(16.dp))
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Star, contentDescription = "Premium", tint = Color(0xFFFF4040), modifier = Modifier.size(16.dp))
-            Spacer(modifier = Modifier.width(6.dp))
-            Text("GET PREMIUM", color = Color(0xFFFF4040), fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { navController.navigate(Screen.Premium) })
+            // AVATAR
+            Box(modifier = Modifier.size(120.dp)) {
+                AsyncImage(
+                    model = "https://i.pravatar.cc/150?img=11",
+                    contentDescription = "Avatar",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                        .border(4.dp, Color(0xFF7D1B1B), CircleShape) // Dark red border
+                )
+                // Camera icon badge
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(x = (-4).dp, y = (-4).dp)
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFFF4040)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.CameraAlt, contentDescription = "Change Photo", tint = Color.White, modifier = Modifier.size(18.dp))
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(24.dp))
+            
+            // INFO
+            Column {
+                Text("satu", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)
+                Text("@Satyam Pote", color = Color.Gray, fontSize = 16.sp)
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // PREMIUM BADGE
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.WorkspacePremium, contentDescription = "Premium", tint = Color(0xFFFF4040), modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("PREMIUM INDIVIDUAL", color = Color(0xFFFF4040), fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // SEED LISTENER BADGE
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFF1E0C0C)) // Very dark red/brown
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.Eco, contentDescription = "Seed", tint = Color(0xFF8BC34A), modifier = Modifier.size(14.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Seed Listener", color = Color(0xFFFF2222), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-        AdBannerPlaceholder()
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Spacer(modifier = Modifier.height(48.dp))
-
-        // PROGRESS SECTION (Restyled)
+        // PROGRESS SECTION (Match design)
         Column(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFF161616))
-                .border(1.dp, Color(0xFF222222), RoundedCornerShape(24.dp))
-                .padding(24.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
         ) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Level $currentLevel", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text("${userStats.totalXp} / ${(currentLevel * 1000)} XP", color = Color.Gray, fontSize = 14.sp)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+                Text("Level $currentLevel", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
+                Text("${userStats.totalXp} / ${(currentLevel * 1000)} XP", color = Color.LightGray, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(12.dp))
             LinearProgressIndicator(
                 progress = progress,
-                modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
-                color = Color(0xFFFF4040),
+                modifier = Modifier.fillMaxWidth().height(16.dp).clip(CircleShape),
+                color = Color(0xFFFF8A8A), // Light pinkish red
                 backgroundColor = Color(0xFF2A2A2A)
             )
             Spacer(modifier = Modifier.height(12.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("${(progress * 100).toInt()}% to Level ${currentLevel + 1}", color = Color.Gray, fontSize = 14.sp)
-                Text("Total songs played: $totalSongs", color = Color.Gray, fontSize = 14.sp)
+                Text("${(progress * 100).toInt()}% to Level ${currentLevel + 1}", color = Color.Gray, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Total song played ", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.MusicNote, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(14.dp))
+                    Text(" $totalSongs", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
 
