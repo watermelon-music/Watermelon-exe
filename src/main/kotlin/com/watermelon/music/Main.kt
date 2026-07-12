@@ -27,6 +27,7 @@ import com.watermelon.music.ui.components.CustomTitleBar
 import com.watermelon.music.ui.home.HomeScreen
 import com.watermelon.music.ui.player.BottomPlayer
 import com.watermelon.music.ui.player.PlayerViewModel
+import com.watermelon.music.ui.premium.PremiumScreen
 import com.watermelon.music.ui.profile.ProfileScreen
 import com.watermelon.music.ui.library.LibraryScreen
 import com.watermelon.music.ui.radio.RadioScreen
@@ -69,13 +70,16 @@ fun App(playerViewModel: PlayerViewModel, navController: NavController, isRightP
                             com.watermelon.music.ui.search.SearchScreen(playerViewModel)
                         }
                         is Screen.Profile -> {
-                            ProfileScreen()
+                            ProfileScreen(navController)
                         }
                         is Screen.Library -> {
                             LibraryScreen(playerViewModel)
                         }
                         is Screen.Radio -> {
                             RadioScreen(playerViewModel)
+                        }
+                        is Screen.Premium -> {
+                            PremiumScreen(navController)
                         }
                         else -> {}
                     }

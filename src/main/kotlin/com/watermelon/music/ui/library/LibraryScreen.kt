@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.watermelon.music.data.LibraryEngine
 import com.watermelon.music.domain.model.Song
+import com.watermelon.music.ui.home.AdBannerPlaceholder
 import com.watermelon.music.ui.player.PlayerViewModel
 
 @Composable
@@ -49,6 +50,9 @@ fun LibraryScreen(playerViewModel: PlayerViewModel?) {
             TabButton("Liked Songs", isSelected = selectedTab == 0) { selectedTab = 0 }
             TabButton("Playlists", isSelected = selectedTab == 1) { selectedTab = 1 }
         }
+
+        AdBannerPlaceholder()
+        Spacer(modifier = Modifier.height(16.dp))
 
         if (selectedTab == 0) {
             if (library.likedSongs.isEmpty()) {

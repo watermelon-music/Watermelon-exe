@@ -12,6 +12,7 @@ sealed class Screen {
     object Profile : Screen()
     object Library : Screen()
     object Radio : Screen()
+    object Premium : Screen()
 }
 
 class NavController(initialScreen: Screen) {

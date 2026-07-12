@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.watermelon.music.data.repository.MusicCatalogRepository
 import com.watermelon.music.domain.model.Song
+import com.watermelon.music.ui.home.AdBannerPlaceholder
 import com.watermelon.music.ui.player.PlayerViewModel
 import kotlinx.coroutines.launch
 
@@ -64,6 +65,10 @@ fun RadioScreen(playerViewModel: PlayerViewModel?) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
+        
+        AdBannerPlaceholder()
+        Spacer(modifier = Modifier.height(16.dp))
+        
         Text(
             text = "An endless algorithmic stream based on top hits.",
             color = Color.Gray,

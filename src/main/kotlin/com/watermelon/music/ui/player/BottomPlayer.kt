@@ -81,15 +81,6 @@ fun BottomPlayer(viewModel: PlayerViewModel, onFullScreenToggle: () -> Unit) {
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            val isLiked = library.likedSongs.any { it.id == currentSong?.id }
-            Icon(
-                imageVector = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = "Like",
-                tint = if (isLiked) Color(0xFFF6070A) else Color.Gray,
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickable { viewModel.toggleLike() }
-            )
         }
 
         // CENTER: Player Controls
@@ -202,12 +193,12 @@ fun BottomPlayer(viewModel: PlayerViewModel, onFullScreenToggle: () -> Unit) {
                 )
             )
             Spacer(modifier = Modifier.width(16.dp))
-            var isLiked by remember { mutableStateOf(false) }
+            val isLiked = library.likedSongs.any { it.id == currentSong?.id }
             Icon(
                 imageVector = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = "Like",
-                tint = if (isLiked) Color.Red else Color.Gray,
-                modifier = Modifier.size(20.dp).clickable { isLiked = !isLiked }
+                tint = if (isLiked) Color(0xFFF6070A) else Color.Gray,
+                modifier = Modifier.size(20.dp).clickable { viewModel.toggleLike() }
             )
             Spacer(modifier = Modifier.width(16.dp))
             Icon(

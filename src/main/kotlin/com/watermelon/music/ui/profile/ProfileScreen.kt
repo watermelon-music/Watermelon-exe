@@ -26,9 +26,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.watermelon.music.data.GamificationEngine
+import com.watermelon.music.navigation.NavController
+import com.watermelon.music.navigation.Screen
+import com.watermelon.music.ui.home.AdBannerPlaceholder
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(navController: NavController) {
     val userStats by GamificationEngine.userStats.collectAsState()
     val currentLevel = GamificationEngine.getLevel(userStats.totalXp)
     val progress = GamificationEngine.getXpProgress(userStats.totalXp)
@@ -99,8 +102,12 @@ fun ProfileScreen() {
         ) {
             Icon(Icons.Default.Star, contentDescription = "Premium", tint = Color(0xFFFF4040), modifier = Modifier.size(16.dp))
             Spacer(modifier = Modifier.width(6.dp))
-            Text("PREMIUM INDIVIDUAL", color = Color(0xFFFF4040), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text("GET PREMIUM", color = Color(0xFFFF4040), fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { navController.navigate(Screen.Premium) })
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        AdBannerPlaceholder()
+        Spacer(modifier = Modifier.height(24.dp))
 
         Spacer(modifier = Modifier.height(48.dp))
 

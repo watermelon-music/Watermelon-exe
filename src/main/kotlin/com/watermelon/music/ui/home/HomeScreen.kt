@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.watermelon.music.data.PremiumManager
 import com.watermelon.music.domain.model.Song
 import com.watermelon.music.navigation.NavController
 import com.watermelon.music.navigation.Screen
@@ -231,6 +232,7 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                         }
                         item { AdBannerPlaceholder() }
                     } else {
+                        item { AdBannerPlaceholder() }
                         items(viewModel.currentCategories) { category ->
                             val songs = viewModel.categories[category.id]
                             if (!songs.isNullOrEmpty()) {
@@ -253,6 +255,7 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                 }
                             }
                         }
+                        item { AdBannerPlaceholder() }
                     }
                 }
             }
@@ -566,20 +569,24 @@ fun CountryCard(country: com.watermelon.music.domain.model.Country, modifier: Mo
 
 @Composable
 fun AdBannerPlaceholder() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .padding(vertical = 16.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFF222222)),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "AdMob Space",
-            color = Color.Gray,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
-        )
+    val isPremium by PremiumManager.isPremium.collectAsState()
+    
+    if (!isPremium) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(vertical = 16.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color(0xFF222222)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "AdMob Space",
+                color = Color.Gray,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
