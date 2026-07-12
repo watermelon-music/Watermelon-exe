@@ -21,6 +21,6 @@ fun WatermelonSong.toSong() = com.watermelon.music.domain.model.Song(
     id = this.id,
     title = this.title,
     artist = this.uploader ?: this.channel ?: "Unknown Artist",
-    thumbnail = this.thumbnail ?: "https://i.ytimg.com/vi/${this.id}/hqdefault.jpg",
+    thumbnail = this.thumbnail ?: "https://i.ytimg.com/vi/${this.id}/maxresdefault.jpg",
     duration = this.duration_string ?: this.duration?.toString() ?: "0:00"
 )

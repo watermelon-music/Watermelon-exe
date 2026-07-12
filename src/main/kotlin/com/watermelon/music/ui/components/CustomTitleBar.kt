@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowScope
 import androidx.compose.ui.window.WindowState
@@ -113,11 +114,34 @@ fun WindowScope.CustomTitleBar(
             
             Spacer(modifier = Modifier.weight(1f))
             
-            // End Controls: Window Controls
+            // End Controls: Profile + Window Controls
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Profile
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { navController.navigate(Screen.Profile) }
+                ) {
+                    Text("Alex Rivera", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF1E1E1E))
+                    ) {
+                        AsyncImage(
+                            model = "https://i.pravatar.cc/150?img=11",
+                            contentDescription = "Avatar",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.width(16.dp))
+
                 // Minimize
                 Icon(
                     imageVector = Icons.Default.Remove,

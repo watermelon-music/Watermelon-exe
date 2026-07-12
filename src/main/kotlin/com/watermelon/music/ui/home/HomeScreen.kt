@@ -79,27 +79,6 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                         fontSize = 48.sp, // Much bigger as requested
                         fontWeight = FontWeight.ExtraBold
                     )
-                    
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { navController.navigate(Screen.Profile) }
-                    ) {
-                        Text("Alex Rivera", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF1E1E1E))
-                        ) {
-                            // User Avatar Profile Picture (Placeholder)
-                            AsyncImage(
-                                model = "https://i.pravatar.cc/150?img=11",
-                                contentDescription = "Avatar",
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                    }
                 }
 
                 LazyColumn(
@@ -124,7 +103,7 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                     }
 
                     // HERO BANNER
-                    if (viewModel.currentFilter != HomeViewModel.Filter.RADIO) {
+                    if (viewModel.currentFilter == HomeViewModel.Filter.ALL || viewModel.currentFilter == HomeViewModel.Filter.MUSIC) {
                         item {
                             HeroBanner(viewModel, playerViewModel)
                         }
