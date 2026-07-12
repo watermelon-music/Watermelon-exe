@@ -11,6 +11,7 @@ import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -165,7 +166,7 @@ fun ProfileScreen() {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Logout, contentDescription = "Log Out", tint = Color.White, modifier = Modifier.size(18.dp))
+            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout", tint = Color.White, modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.width(8.dp))
             Text("Log Out", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         }

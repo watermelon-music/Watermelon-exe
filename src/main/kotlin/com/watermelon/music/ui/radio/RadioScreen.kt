@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun RadioScreen(playerViewModel: PlayerViewModel?) {
     val repository = remember { MusicCatalogRepository() }
-    val scope = rememberCoroutineScope()
+
     
     var radioSongs by remember { mutableStateOf<List<Song>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }

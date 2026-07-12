@@ -101,18 +101,6 @@ fun MiniPlayer(viewModel: PlayerViewModel) {
                     Spacer(modifier = Modifier.width(16.dp))
                 }
                 
-                val isLiked = library.likedSongs.any { it.id == currentSong?.id }
-                Icon(
-                    imageVector = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Like",
-                    tint = if (isLiked) Color(0xFFFF3B3B) else Color.White,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable { viewModel.toggleLike() }
-                )
-                
-                Spacer(modifier = Modifier.width(16.dp))
-                
                 Box(
                     modifier = Modifier
                         .size(48.dp)
@@ -127,6 +115,18 @@ fun MiniPlayer(viewModel: PlayerViewModel) {
                         modifier = Modifier.size(32.dp)
                     )
                 }
+                
+                Spacer(modifier = Modifier.width(16.dp))
+                
+                val isLiked = library.likedSongs.any { it.id == currentSong?.id }
+                Icon(
+                    imageVector = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Like",
+                    tint = if (isLiked) Color(0xFFFF3B3B) else Color.White,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { viewModel.toggleLike() }
+                )
             }
         }
     }

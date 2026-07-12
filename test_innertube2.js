@@ -1,0 +1,39 @@
+const url = 'https://www.youtube.com/youtubei/v1/player';
+const data = {
+    context: {
+        client: {
+            hl: 'en',
+            clientName: 'ANDROID',
+            clientVersion: '19.29.37',
+            androidSdkVersion: 33,
+            osName: 'Android',
+            osVersion: '13'
+        }
+    },
+    videoId: 'dQw4w9WgXcQ',
+    playbackContext: {
+        contentPlaybackContext: {
+            signatureTimestamp: 19000
+        }
+    }
+};
+fetch(url, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'com.google.android.youtube/19.29.37 (Linux; U; Android 13; en_US) gzip'
+    },
+    body: JSON.stringify(data)
+})
+.then(res => res.json())
+.then(json => {
+    if (json.streamingData && json.streamingData.adaptiveFormats) {
+        let m4a = json.streamingData.adaptiveFormats.find(f => f.mimeType.includes('audio/mp4'));
+        console.log('M4A URL:', m4a ? 'SUCCESS' : 'NOT FOUND');
+    } else if (json.playabilityStatus && json.playabilityStatus.status === 'ERROR') {
+        console.log('Error:', json.playabilityStatus.reason);
+    } else {
+        console.log('No streaming data found');
+    }
+})
+.catch(err => console.error('Error:', err));

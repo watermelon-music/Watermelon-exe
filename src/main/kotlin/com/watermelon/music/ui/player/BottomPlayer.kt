@@ -11,6 +11,7 @@ import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -186,11 +187,11 @@ fun BottomPlayer(viewModel: PlayerViewModel) {
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.weight(1f)
         ) {
-            Icon(Icons.Default.QueueMusic, contentDescription = "Queue", tint = Color.Gray, modifier = Modifier.size(20.dp))
+            Icon(Icons.AutoMirrored.Filled.QueueMusic, contentDescription = "Queue", tint = Color.Gray, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(16.dp))
             Icon(Icons.Default.SpeakerGroup, contentDescription = "Devices", tint = Color.Gray, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(16.dp))
-            Icon(Icons.Default.VolumeUp, contentDescription = "Volume", tint = Color.Gray, modifier = Modifier.size(20.dp))
+            Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "Volume", tint = Color.Gray, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
             Slider(
                 value = volume,

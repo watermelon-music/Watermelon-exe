@@ -61,5 +61,8 @@ compose.desktop {
             packageName = "Watermelon"
             packageVersion = "1.0.0"
         }
+        buildTypes.release.proguard {
+            isEnabled.set(false)
+        }
     }
 }

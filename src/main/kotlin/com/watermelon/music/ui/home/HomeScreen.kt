@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -182,7 +183,7 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                                         .padding(bottom = 16.dp)
                                         .clickable { viewModel.selectRadioCountry(null) }
                                 ) {
-                                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text("Back to Countries", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                                 }
@@ -424,14 +425,14 @@ fun SexyBroadcastSection(category: String, songs: List<Song>, onSongClick: (Song
 fun BroadcastCard(song: Song, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
         modifier = modifier
-            .height(140.dp)
+            .aspectRatio(1f) // Make it perfectly square
             .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
     ) {
         AsyncImage(
             model = song.thumbnail,
             contentDescription = "Cover",
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Crop, // This ensures it fills the square beautifully
             modifier = Modifier.fillMaxSize().background(Color(0xFF1E1E1E))
         )
         
@@ -455,7 +456,7 @@ fun BroadcastCard(song: Song, modifier: Modifier = Modifier, onClick: () -> Unit
             Text(
                 text = song.title,
                 color = Color.White,
-                fontSize = 14.sp,
+                fontSize = 16.sp, // Slightly larger text for big cards
                 fontWeight = FontWeight.Bold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
