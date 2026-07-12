@@ -68,6 +68,11 @@ fun App(playerViewModel: PlayerViewModel) {
                         else -> {}
                     }
                 }
+                
+                // Right Panel (Context Panel)
+                if (navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
+                    com.watermelon.music.ui.components.RightPanel(playerViewModel)
+                }
             }
             
             // Bottom Player (spans full width)

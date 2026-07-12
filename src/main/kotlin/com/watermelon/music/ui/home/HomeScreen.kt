@@ -47,7 +47,7 @@ import com.watermelon.music.ui.player.PlayerViewModel
 fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? = null) {
     val viewModel = remember { HomeViewModel() }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF080808))) {
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF000000))) {
         if (viewModel.isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
@@ -71,7 +71,7 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                     // Logo Text
                     Text(
                         text = "Watermelon",
-                        color = Color(0xFFFF4040), // Dark Red/Watermelon color
+                        color = Color(0xFFF6070A), // Dark Red/Watermelon color
                         fontSize = 36.sp, // Made much bigger
                         fontWeight = FontWeight.ExtraBold
                     )
@@ -86,7 +86,7 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape)
-                                .background(Color.DarkGray)
+                                .background(Color(0xFF1E1E1E))
                         ) {
                             // User Avatar Profile Picture (Placeholder)
                             AsyncImage(
@@ -101,6 +101,15 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                 LazyColumn(
                     modifier = Modifier.weight(1f).padding(horizontal = 16.dp)
                 ) {
+                    // FILTER CHIPS
+                    item {
+                        Row(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FilterChip(text = "All", isSelected = true)
+                            FilterChip(text = "Music", isSelected = false)
+                            FilterChip(text = "Podcasts", isSelected = false)
+                        }
+                    }
+
                     // HERO BANNER
                     item {
                         HeroBanner(viewModel, playerViewModel)
@@ -133,7 +142,7 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
     if (carouselSongs.isEmpty()) {
         // Fallback static banner if no songs are loaded
         Box(
-            modifier = Modifier.fillMaxWidth().height(300.dp).clip(RoundedCornerShape(16.dp)).background(Color.DarkGray)
+            modifier = Modifier.fillMaxWidth().height(300.dp).clip(RoundedCornerShape(16.dp)).background(Color(0xFF111111))
         )
         return
     }
@@ -156,7 +165,7 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
             .fillMaxWidth()
             .height(300.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF1E1E1E))
+            .background(Color(0xFF111111))
     ) {
         // Background Image
         AsyncImage(
@@ -196,7 +205,7 @@ fun HeroBanner(viewModel: HomeViewModel, playerViewModel: PlayerViewModel?) {
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(24.dp))
-                    .background(Color(0xFFFF4040))
+                    .background(Color(0xFFF6070A))
                     .clickable {
                         playerViewModel?.playSong(currentSong)
                     }
@@ -242,7 +251,7 @@ fun ModernSongCard(song: Song, onClick: () -> Unit) {
         
         Text(
             text = song.artist,
-            color = Color(0xFFFF8A8A), // Light red/pinkish for artist name to match the aesthetic
+            color = Color(0xFFF6070A), // Red for artist name to match the aesthetic
             fontSize = 12.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -273,5 +282,24 @@ fun SongCategoryRow(category: String, songs: List<Song>, playerViewModel: Player
             }
         }
         Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+fun FilterChip(text: String, isSelected: Boolean) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(24.dp))
+            .background(if (isSelected) Color.White else Color(0xFF111111))
+            .clickable {}
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = if (isSelected) Color.Black else Color.White,
+            fontWeight = FontWeight.Medium,
+            fontSize = 14.sp
+        )
     }
 }

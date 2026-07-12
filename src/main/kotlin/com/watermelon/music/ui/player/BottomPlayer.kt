@@ -41,8 +41,8 @@ fun BottomPlayer(viewModel: PlayerViewModel) {
         modifier = Modifier
             .fillMaxWidth()
             .height(90.dp)
-            .background(Color(0xFF181818))
-            .padding(horizontal = 16.dp),
+            .background(Color(0xFF000000))
+            .padding(horizontal = 24.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -86,7 +86,7 @@ fun BottomPlayer(viewModel: PlayerViewModel) {
             Icon(
                 imageVector = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = "Like",
-                tint = if (isLiked) Color(0xFFFF4040) else Color.Gray,
+                tint = if (isLiked) Color(0xFFF6070A) else Color.Gray,
                 modifier = Modifier
                     .size(20.dp)
                     .clickable { viewModel.toggleLike() }
@@ -118,7 +118,7 @@ fun BottomPlayer(viewModel: PlayerViewModel) {
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFFF4040))
+                        .background(Color(0xFFF6070A))
                         .clickable { viewModel.togglePlayPause() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -160,8 +160,8 @@ fun BottomPlayer(viewModel: PlayerViewModel) {
                     modifier = Modifier.weight(1f).padding(horizontal = 8.dp).height(16.dp),
                     colors = SliderDefaults.colors(
                         thumbColor = Color.White,
-                        activeTrackColor = Color(0xFFFF4040),
-                        inactiveTrackColor = Color.DarkGray
+                        activeTrackColor = Color(0xFFF6070A),
+                        inactiveTrackColor = Color(0xFF222222)
                     )
                 )
                 Text("4:12", color = Color.Gray, fontSize = 10.sp) // Dummy total time for now
@@ -187,7 +187,7 @@ fun BottomPlayer(viewModel: PlayerViewModel) {
                 colors = SliderDefaults.colors(
                     thumbColor = Color.White,
                     activeTrackColor = Color.White,
-                    inactiveTrackColor = Color.DarkGray
+                    inactiveTrackColor = Color(0xFF222222)
                 )
             )
         }

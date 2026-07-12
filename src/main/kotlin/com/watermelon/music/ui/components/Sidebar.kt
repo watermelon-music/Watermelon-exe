@@ -4,124 +4,134 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LibraryMusic
-import androidx.compose.material.icons.filled.Radio
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.watermelon.music.navigation.NavController
 import com.watermelon.music.navigation.Screen
 
 @Composable
 fun Sidebar(navController: NavController) {
-    val currentScreen = navController.currentScreen
-
     Column(
         modifier = Modifier
             .fillMaxHeight()
-            .width(220.dp)
-            .background(Color(0xFF0F0F0F))
-            .padding(vertical = 24.dp)
+            .width(80.dp)
+            .background(Color(0xFF050505)) // Pitch Black
+            .padding(vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Logo
+        // Menu / Logo Icon
+        Icon(
+            imageVector = Icons.Default.Menu,
+            contentDescription = "Menu",
+            tint = Color.White,
+            modifier = Modifier.size(28.dp).clickable { navController.navigate(Screen.Home) }
+        )
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        // Plus Button
         Box(
             modifier = Modifier
-                .padding(start = 24.dp, bottom = 48.dp)
-                .size(40.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.White),
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF1E1E1E))
+                .clickable { /* Add new playlist */ },
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource("watermelon_icon.png"), // Assuming this exists in resources
-                contentDescription = "Logo",
-                modifier = Modifier.size(24.dp)
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add",
+                tint = Color.White,
+                modifier = Modifier.size(28.dp)
             )
         }
-
-        // Navigation Items
-        SidebarItem(
-            icon = Icons.Default.Home,
-            title = "Home",
-            isSelected = currentScreen == Screen.Home,
-            onClick = { navController.navigate(Screen.Home) }
-        )
-        SidebarItem(
-            icon = Icons.Default.Search,
-            title = "Search",
-            isSelected = currentScreen == Screen.Search,
-            onClick = { navController.navigate(Screen.Search) }
-        )
-        SidebarItem(
-            icon = Icons.Default.Radio,
-            title = "Radio",
-            isSelected = currentScreen == Screen.Radio,
-            onClick = { navController.navigate(Screen.Radio) }
-        )
-        SidebarItem(
-            icon = Icons.Default.LibraryMusic,
-            title = "Playlist",
-            isSelected = currentScreen == Screen.Library,
-            onClick = { navController.navigate(Screen.Library) }
-        )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Liked Songs (Heart)
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(Color(0xFF6C27F8), Color(0xFFA0D1CD))
+                    )
+                )
+                .clickable { navController.navigate(Screen.Library) },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Favorite,
+                contentDescription = "Liked Songs",
+                tint = Color.White,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Dummy Playlist Covers
+        PlaylistIcon("https://i.scdn.co/image/ab67706c0000da845b410f95b5cc454226fbf285")
+        Spacer(modifier = Modifier.height(16.dp))
+        PlaylistIcon("https://i.scdn.co/image/ab67706c0000da843f54593edec566f0653697eb")
+        Spacer(modifier = Modifier.height(16.dp))
+        PlaylistIcon("https://i.scdn.co/image/ab67706c0000da84b6fbb7fc21c009d13f9c66cc")
+        Spacer(modifier = Modifier.height(16.dp))
+        PlaylistIcon("https://i.scdn.co/image/ab67616d0000b273db16e53c7a02c5c99dd1844b")
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Circular Avatars (Friends)
+        AvatarIcon("https://i.pravatar.cc/150?img=68")
+        Spacer(modifier = Modifier.height(16.dp))
+        AvatarIcon("https://i.pravatar.cc/150?img=52")
+        Spacer(modifier = Modifier.height(16.dp))
+        AvatarIcon("https://i.pravatar.cc/150?img=12")
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        PlaylistIcon("https://i.scdn.co/image/ab67616d0000b273ea7caaff71dea1051d49b2fe")
     }
 }
 
 @Composable
-fun SidebarItem(
-    icon: ImageVector,
-    title: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
+fun PlaylistIcon(url: String) {
+    AsyncImage(
+        model = url,
+        contentDescription = "Playlist",
+        contentScale = ContentScale.Crop,
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 12.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(
-                if (isSelected) Color(0xFF2A1515) // Soft dark red gradient approximation
-                else Color.Transparent
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = title,
-            tint = if (isSelected) Color(0xFFFF4040) else Color.Gray,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = title,
-            color = if (isSelected) Color.White else Color.Gray,
-            fontSize = 14.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            modifier = Modifier.weight(1f)
-        )
-        if (isSelected) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(16.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(Color(0xFFFF4040))
-            )
-        }
-    }
+            .size(56.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { }
+    )
+}
+
+@Composable
+fun AvatarIcon(url: String) {
+    AsyncImage(
+        model = url,
+        contentDescription = "User",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .size(56.dp)
+            .clip(CircleShape)
+            .clickable { }
+    )
 }
