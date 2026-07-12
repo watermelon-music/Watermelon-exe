@@ -49,9 +49,9 @@ object RadioBrowserApi {
     suspend fun getStationsByCountry(country: String, limit: Int = 10): List<Song> = withContext(Dispatchers.IO) {
         // order by votes to get the best/most popular stations in that country
         val encodedCountry = java.net.URLEncoder.encode(country, "UTF-8")
-        // Sometimes exact matching with spaces fails, we can just use normal bycountry endpoint instead of exact if needed, but exact is fine
+        // Use normal bycountry endpoint instead of exact/ to avoid 404 errors on long country names
         val request = Request.Builder()
-            .url("$BASE_URL/stations/bycountry/exact/$encodedCountry?limit=$limit&order=votes&reverse=true")
+            .url("$BASE_URL/stations/bycountry/$encodedCountry?limit=$limit&order=votes&reverse=true")
             .build()
         try {
             client.newCall(request).execute().use { response ->
