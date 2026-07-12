@@ -21,10 +21,12 @@ class HomeViewModel(
         private set
     var categories by mutableStateOf<Map<String, List<Song>>>(emptyMap())
         private set
+    var currentCategories by mutableStateOf<List<com.watermelon.music.domain.model.Category>>(emptyList())
+        private set
     var topHits by mutableStateOf<List<Song>>(emptyList())
         private set
 
-    enum class Filter { ALL, MUSIC, PODCASTS }
+    enum class Filter { ALL, MUSIC, BROADCASTS }
     var currentFilter by mutableStateOf(Filter.ALL)
         private set
 
@@ -49,7 +51,7 @@ class HomeViewModel(
                 val query = when (currentFilter) {
                     Filter.ALL -> "top hits music trending"
                     Filter.MUSIC -> "latest hit songs music"
-                    Filter.PODCASTS -> "top trending podcasts full episodes"
+                    Filter.BROADCASTS -> "live broadcast radio podcast full episodes"
                 }
                 
                 val continueResult = repository.search(query).take(8)
@@ -57,16 +59,18 @@ class HomeViewModel(
                 isLoading = false // Show UI immediately after top row loads
 
                 // 2. Fetch categories sequentially with delay to save server costs
-                val filteredCategories = if (currentFilter == Filter.PODCASTS) {
+                val filteredCategories = if (currentFilter == Filter.BROADCASTS) {
                     listOf(
+                        com.watermelon.music.domain.model.Category("news", "News Broadcasts", "live news broadcast full"),
+                        com.watermelon.music.domain.model.Category("sports", "Sports Radio", "sports radio live broadcast"),
                         com.watermelon.music.domain.model.Category("comedy", "Comedy Podcasts", "comedy podcast full episode"),
-                        com.watermelon.music.domain.model.Category("tech", "Tech Podcasts", "technology podcast episode"),
-                        com.watermelon.music.domain.model.Category("truecrime", "True Crime", "true crime podcast full episode")
+                        com.watermelon.music.domain.model.Category("tech", "Tech & Science", "technology podcast episode")
                     )
                 } else {
                     HOME_CATEGORIES
                 }
                 
+                currentCategories = filteredCategories
                 categories = emptyMap() // Reset categories
                 
                 for (cat in filteredCategories) {

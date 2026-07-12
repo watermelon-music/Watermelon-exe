@@ -110,8 +110,8 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                             FilterChip(text = "Music", isSelected = viewModel.currentFilter == HomeViewModel.Filter.MUSIC) {
                                 viewModel.setFilter(HomeViewModel.Filter.MUSIC)
                             }
-                            FilterChip(text = "Podcasts", isSelected = viewModel.currentFilter == HomeViewModel.Filter.PODCASTS) {
-                                viewModel.setFilter(HomeViewModel.Filter.PODCASTS)
+                            FilterChip(text = "Broadcast", isSelected = viewModel.currentFilter == HomeViewModel.Filter.BROADCASTS) {
+                                viewModel.setFilter(HomeViewModel.Filter.BROADCASTS)
                             }
                         }
                     }
@@ -126,7 +126,7 @@ fun HomeScreen(navController: NavController, playerViewModel: PlayerViewModel? =
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                     }
-                    items(com.watermelon.music.domain.model.HOME_CATEGORIES) { category ->
+                    items(viewModel.currentCategories) { category ->
                         val songs = viewModel.categories[category.id]
                         if (!songs.isNullOrEmpty()) {
                             SongCategoryRow(
