@@ -10,6 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 
 class HomeViewModel(
     private val repository: MusicCatalogRepository = MusicCatalogRepository(),
@@ -36,8 +38,8 @@ class HomeViewModel(
     var countryStations by mutableStateOf<List<Song>>(emptyList())
         private set
 
-    enum class Filter { ALL, MUSIC, BROADCASTS, RADIO }
-    var currentFilter by mutableStateOf(Filter.ALL)
+    enum class Filter { MUSIC, BROADCASTS, RADIO }
+    var currentFilter by mutableStateOf(Filter.MUSIC)
         private set
 
     init {
@@ -78,7 +80,6 @@ class HomeViewModel(
                 } else {
                     // 1. Fetch Top Hits first based on filter
                     val query = when (currentFilter) {
-                        Filter.ALL -> "top hits music trending"
                         Filter.MUSIC -> "latest hit songs music"
                         Filter.BROADCASTS -> "live broadcast radio podcast full episodes"
                         else -> ""

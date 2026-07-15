@@ -64,10 +64,52 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
     var selectedActionSong by remember { mutableStateOf<Song?>(null) }
     var isBroadcastAction by remember { mutableStateOf(false) }
     var actionSongsList by remember { mutableStateOf<List<Song>?>(null) }
+    var songToAddToPlaylist by remember { mutableStateOf<Song?>(null) }
+    
+    val library by LibraryEngine.library.collectAsState()
+
+    if (songToAddToPlaylist != null) {
+        androidx.compose.material.AlertDialog(
+            onDismissRequest = { songToAddToPlaylist = null },
+            backgroundColor = Color(0xFF1E1E1E),
+            title = { Text("Add to Playlist", color = Color.White) },
+            text = {
+                LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp)) {
+                    items(library.playlists) { playlist ->
+                        Text(
+                            text = playlist.name,
+                            color = Color.White,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    LibraryEngine.addSongToPlaylist(playlist.id, songToAddToPlaylist!!)
+                                    songToAddToPlaylist = null
+                                }
+                                .padding(vertical = 12.dp)
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                androidx.compose.material.TextButton(onClick = { songToAddToPlaylist = null }) {
+                    Text("Close", color = Color(0xFFFF3B3B))
+                }
+            }
+        )
+    }
     
     if (selectedActionSong != null) {
+        val song = selectedActionSong!!
+        val isLiked = if (isBroadcastAction) {
+            library.likedRadios.any { it.id == song.id || (it.streamUrl == song.streamUrl && !it.streamUrl.isNullOrEmpty()) } ||
+            library.likedBroadcasts.any { it.id == song.id || (it.streamUrl == song.streamUrl && !it.streamUrl.isNullOrEmpty()) }
+        } else {
+            library.likedSongs.any { it.id == song.id || (it.streamUrl == song.streamUrl && !it.streamUrl.isNullOrEmpty()) }
+        }
+        
         SongActionDialog(
-            song = selectedActionSong!!,
+            song = song,
+            isLiked = isLiked,
             isRadioOrBroadcast = isBroadcastAction,
             onDismiss = { selectedActionSong = null },
             onPlay = {
@@ -86,10 +128,15 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                 }
             },
             onLike = {
-                LibraryEngine.toggleLike(selectedActionSong!!)
+                if (isBroadcastAction) {
+                    LibraryEngine.toggleLikeRadio(selectedActionSong!!)
+                } else {
+                    LibraryEngine.toggleLike(selectedActionSong!!)
+                }
             },
             onAddToPlaylist = {
-                // Future expansion: Open playlist selector
+                songToAddToPlaylist = selectedActionSong
+                selectedActionSong = null
             }
         )
     }
@@ -130,16 +177,10 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                     // FILTER CHIPS
                     item {
                         Row(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FilterChip(text = "All", isSelected = viewModel.currentFilter == HomeViewModel.Filter.ALL) {
-                                viewModel.setFilter(HomeViewModel.Filter.ALL)
-                            }
                             FilterChip(text = "Music", isSelected = viewModel.currentFilter == HomeViewModel.Filter.MUSIC) {
                                 viewModel.setFilter(HomeViewModel.Filter.MUSIC)
                             }
-                            FilterChip(text = "Broadcast", isSelected = viewModel.currentFilter == HomeViewModel.Filter.BROADCASTS) {
-                                viewModel.setFilter(HomeViewModel.Filter.BROADCASTS)
-                            }
-                            FilterChip(text = "Radio", isSelected = viewModel.currentFilter == HomeViewModel.Filter.RADIO) {
+                            FilterChip(text = "Radio & Broadcast", isSelected = viewModel.currentFilter == HomeViewModel.Filter.RADIO) {
                                 viewModel.setFilter(HomeViewModel.Filter.RADIO)
                             }
                         }
@@ -230,98 +271,8 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                 Spacer(modifier = Modifier.height(24.dp))
                             }
                         }
-                    } else if (viewModel.currentFilter == HomeViewModel.Filter.ALL) {
-                        item { AdBannerPlaceholder() }
-                        // Show Radio and Broadcasts side by side in ALL
-                        val broadcasts = viewModel.categories["broadcasts"] ?: emptyList()
-                        item {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                // Radio Side
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Radio Stations",
-                                        color = Color.White,
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        modifier = Modifier.padding(bottom = 12.dp)
-                                    )
-                                    if (viewModel.topGlobalRadios.isNotEmpty()) {
-                                        RadioGridBox(
-                                            radios = viewModel.topGlobalRadios.take(4),
-                                            onSongClick = { song -> playerViewModel?.playRadio(song) },
-                                            onSongRightClick = { song -> 
-                                                selectedActionSong = song
-                                                isBroadcastAction = true
-                                                actionSongsList = null
-                                            }
-                                        )
-                                    } else {
-                                        // Loading Skeleton
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(260.dp)
-                                                .clip(RoundedCornerShape(24.dp))
-                                                .background(Color(0xFF1E1E1E))
-                                        )
-                                    }
-                                }
 
-                                // Broadcast Side
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Top Broadcasts",
-                                        color = Color.White,
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        modifier = Modifier.padding(bottom = 12.dp)
-                                    )
-                                    if (broadcasts.isNotEmpty()) {
-                                        RotatingBroadcastBox(
-                                            broadcasts = if (broadcasts.size >= 20) broadcasts.drop(10).take(10) else broadcasts,
-                                            onSongClick = { song -> playerViewModel?.playRadio(song, broadcasts) },
-                                            onSongRightClick = { song -> 
-                                                selectedActionSong = song
-                                                isBroadcastAction = true
-                                                actionSongsList = broadcasts
-                                            }
-                                        )
-                                    } else {
-                                        // Loading Skeleton
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(260.dp)
-                                                .clip(RoundedCornerShape(24.dp))
-                                                .background(Color(0xFF1E1E1E))
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        item { AdBannerPlaceholder() }
-                        // Show standard categories
-                        items(viewModel.currentCategories.filter { it.id != "broadcasts" }) { category ->
-                            val songs = viewModel.categories[category.id]
-                            if (!songs.isNullOrEmpty()) {
-                                SongCategoryRow(
-                                    category = category.title,
-                                    songs = songs,
-                                    onSongClick = { song -> playerViewModel?.playSong(song, songs) },
-                                    onSongRightClick = { song -> 
-                                        selectedActionSong = song
-                                        isBroadcastAction = false
-                                        actionSongsList = songs
-                                    }
-                                )
-                            }
-                        }
-                        item { AdBannerPlaceholder() }
                     } else {
-                        item { AdBannerPlaceholder() }
                         items(viewModel.currentCategories) { category ->
                             val songs = viewModel.categories[category.id]
                             if (!songs.isNullOrEmpty()) {
@@ -350,7 +301,6 @@ fun HomeScreen(playerViewModel: PlayerViewModel? = null) {
                                 }
                             }
                         }
-                        item { AdBannerPlaceholder() }
                     }
                 }
             }
@@ -753,26 +703,3 @@ fun CountryCard(country: com.watermelon.music.domain.model.Country, modifier: Mo
     }
 }
 
-@Composable
-fun AdBannerPlaceholder() {
-    val isPremium by PremiumManager.isPremium.collectAsState()
-    
-    if (!isPremium) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .padding(vertical = 16.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFF222222)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "AdMob Space",
-                color = Color.Gray,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
-    }
-}

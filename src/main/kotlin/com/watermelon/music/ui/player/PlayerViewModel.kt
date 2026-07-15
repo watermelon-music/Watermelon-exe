@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.delay
 import org.schabi.newpipe.extractor.ServiceList
 import org.schabi.newpipe.extractor.stream.StreamExtractor
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,14 +49,70 @@ class PlayerViewModel {
     private val _currentQueue = MutableStateFlow<List<Song>>(emptyList())
     val currentQueue: StateFlow<List<Song>> = _currentQueue.asStateFlow()
     
+    // Type tracking for liking
+    private val _currentType = MutableStateFlow("song") // "song", "radio", or "broadcast"
+    val currentType: StateFlow<String> = _currentType.asStateFlow()
+
+    private val _isShuffle = MutableStateFlow(false)
+    val isShuffle: StateFlow<Boolean> = _isShuffle.asStateFlow()
+
+    private val _isLooping = MutableStateFlow(false)
+    val isLooping: StateFlow<Boolean> = _isLooping.asStateFlow()
+
     private var currentIndex = -1
+    private var shuffledIndices: List<Int> = emptyList()
+    
+    private var recordPlayJob: kotlinx.coroutines.Job? = null
+
+    init {
+        AudioPlayer.onSongEnd = {
+            if (_isLooping.value) {
+                // Play same song again
+                val current = currentSong.value
+                if (current != null) {
+                    if (current.duration == "LIVE") playRadio(current, _currentQueue.value)
+                    else playSong(current, _currentQueue.value)
+                }
+            } else {
+                playNext()
+            }
+        }
+    }
 
     fun playSong(song: Song, queue: List<Song> = emptyList()) {
-        _currentQueue.value = queue
+        _currentType.value = "song"
+        if (queue != _currentQueue.value) {
+            _currentQueue.value = queue
+            if (_isShuffle.value) {
+                shuffledIndices = queue.indices.shuffled()
+            }
+        }
         currentIndex = queue.indexOf(song)
+        
+        recordPlayJob?.cancel()
         
         scope.launch {
             _isLoading.value = true
+            // Record play history in Supabase every 10 seconds of playback
+            recordPlayJob = launch {
+                var lastDatabaseUpdatePositionMs = 0L
+                currentPositionMs.collect { pos ->
+                    val elapsed = pos - lastDatabaseUpdatePositionMs
+                    if (elapsed >= 10000L) {
+                        lastDatabaseUpdatePositionMs = pos
+                        try {
+                            withContext(Dispatchers.IO) {
+                                com.watermelon.music.data.AuthRepository().recordRecentlyPlayed(song, 10000L)
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    } else if (elapsed < 0L) {
+                        // User seeked backwards, reset tracker
+                        lastDatabaseUpdatePositionMs = pos
+                    }
+                }
+            }
             
             // Fetch recommendations asynchronously
             launch(Dispatchers.IO) {
@@ -131,12 +188,42 @@ class PlayerViewModel {
         }
     }
 
-    fun playRadio(station: Song, queue: List<Song> = emptyList()) {
-        _currentQueue.value = queue
+    fun playRadio(station: Song, queue: List<Song> = emptyList(), isBroadcast: Boolean = false) {
+        _currentType.value = if (isBroadcast) "broadcast" else "radio"
+        if (queue != _currentQueue.value) {
+            _currentQueue.value = queue
+            if (_isShuffle.value) {
+                shuffledIndices = queue.indices.shuffled()
+            }
+        }
         currentIndex = queue.indexOf(station)
+        
+        recordPlayJob?.cancel()
         
         scope.launch {
             _isLoading.value = true
+            
+            // Record play history in Supabase every 10 seconds of playback
+            recordPlayJob = launch {
+                var lastDatabaseUpdatePositionMs = 0L
+                currentPositionMs.collect { pos ->
+                    val elapsed = pos - lastDatabaseUpdatePositionMs
+                    if (elapsed >= 10000L) {
+                        lastDatabaseUpdatePositionMs = pos
+                        try {
+                            withContext(Dispatchers.IO) {
+                                com.watermelon.music.data.AuthRepository().recordRecentlyPlayed(station, elapsed)
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    } else if (elapsed < 0L) {
+                        // User seeked backwards, reset tracker
+                        lastDatabaseUpdatePositionMs = pos
+                    }
+                }
+            }
+            
             val audioUrl = station.id
             _isLoading.value = false
             AudioPlayer.play(station, audioUrl)
@@ -144,45 +231,74 @@ class PlayerViewModel {
     }
 
     fun playNext() {
-        if (_currentQueue.value.isEmpty() || currentIndex == -1) return
+        val queue = _currentQueue.value
+        if (queue.isEmpty() || currentIndex == -1) return
         
-        if (currentIndex < _currentQueue.value.size - 1) {
-            currentIndex++
-            val nextSong = _currentQueue.value[currentIndex]
-            if (nextSong.duration == "LIVE") {
-                playRadio(nextSong, _currentQueue.value)
-            } else {
-                playSong(nextSong, _currentQueue.value)
-            }
+        val nextIndex = if (_isShuffle.value) {
+            val sIdx = shuffledIndices.indexOf(currentIndex)
+            if (sIdx != -1 && sIdx < shuffledIndices.size - 1) shuffledIndices[sIdx + 1] else return
+        } else {
+            if (currentIndex < queue.size - 1) currentIndex + 1 else return
+        }
+        
+        val nextSong = queue[nextIndex]
+        if (nextSong.duration == "LIVE") {
+            playRadio(nextSong, queue)
+        } else {
+            playSong(nextSong, queue)
         }
     }
 
     fun playPrevious() {
-        if (_currentQueue.value.isEmpty() || currentIndex == -1) return
+        val queue = _currentQueue.value
+        if (queue.isEmpty() || currentIndex == -1) return
         
-        if (currentIndex > 0) {
-            currentIndex--
-            val prevSong = _currentQueue.value[currentIndex]
-            if (prevSong.duration == "LIVE") {
-                playRadio(prevSong, _currentQueue.value)
-            } else {
-                playSong(prevSong, _currentQueue.value)
-            }
+        val prevIndex = if (_isShuffle.value) {
+            val sIdx = shuffledIndices.indexOf(currentIndex)
+            if (sIdx > 0) shuffledIndices[sIdx - 1] else return
+        } else {
+            if (currentIndex > 0) currentIndex - 1 else return
         }
+        
+        val prevSong = queue[prevIndex]
+        if (prevSong.duration == "LIVE") {
+            playRadio(prevSong, queue)
+        } else {
+            playSong(prevSong, queue)
+        }
+    }
+    
+    fun toggleShuffle() {
+        _isShuffle.value = !_isShuffle.value
+        if (_isShuffle.value) {
+            shuffledIndices = _currentQueue.value.indices.shuffled()
+        }
+    }
+    
+    fun toggleLoop() {
+        _isLooping.value = !_isLooping.value
+    }
+
+    fun setVolume(vol: Float) {
+        AudioPlayer.setVolume(vol)
+    }
+
+    fun seek(fraction: Float) {
+        AudioPlayer.seek(fraction)
     }
 
     fun toggleLike() {
         val song = currentSong.value
         if (song != null) {
-            com.watermelon.music.data.LibraryEngine.toggleLike(song)
+            when (_currentType.value) {
+                "radio" -> com.watermelon.music.data.LibraryEngine.toggleLikeRadio(song)
+                "broadcast" -> com.watermelon.music.data.LibraryEngine.toggleLikeBroadcast(song)
+                else -> com.watermelon.music.data.LibraryEngine.toggleLike(song)
+            }
         }
     }
 
     fun togglePlayPause() {
         AudioPlayer.togglePlayPause()
-    }
-    
-    fun setVolume(vol: Float) {
-        AudioPlayer.setVolume(vol)
     }
 }

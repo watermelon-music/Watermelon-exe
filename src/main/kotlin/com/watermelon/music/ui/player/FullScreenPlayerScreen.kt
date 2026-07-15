@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -33,14 +34,26 @@ fun FullScreenPlayerScreen(viewModel: PlayerViewModel) {
         return
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF07304B)) // Deep blue gradient color similar to Spotify
-            .padding(32.dp),
-        horizontalArrangement = Arrangement.spacedBy(32.dp)
-    ) {
-        // LEFT SIDE: DP and Recommendations
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Blurred Background Image
+        AsyncImage(
+            model = currentSong?.thumbnail,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(radius = 80.dp)
+        )
+        // Dark Overlay for readability
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)))
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            horizontalArrangement = Arrangement.spacedBy(32.dp)
+        ) {
+            // LEFT SIDE: DP and Recommendations
         Column(
             modifier = Modifier.weight(1f).fillMaxHeight(),
             verticalArrangement = Arrangement.Center,
@@ -145,11 +158,14 @@ fun FullScreenPlayerScreen(viewModel: PlayerViewModel) {
             val activeIndex = if (lyrics.isNotEmpty()) lyrics.indexOfLast { it.timeSeconds <= (currentPositionMs / 1000f) }.coerceAtLeast(0) else -1
             LaunchedEffect(activeIndex) {
                 if (activeIndex >= 0) {
-                    // Try to scroll so the item is somewhat centered (e.g. subtracting an offset, or just animate to it)
-                    // We'll scroll such that it's near the top for now
-                    listState.animateScrollToItem(activeIndex)
+                    try {
+                        listState.animateScrollToItem(activeIndex)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
+        }
         }
     }
 }

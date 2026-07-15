@@ -42,11 +42,12 @@ object RadioBrowserApi {
                     if (streamUrl.isNotBlank()) {
                         stations.add(
                             Song(
-                                id = streamUrl,
+                                id = obj["stationuuid"]?.jsonPrimitive?.content ?: streamUrl,
                                 title = obj["name"]?.jsonPrimitive?.content?.trim() ?: "Unknown Station",
                                 artist = obj["country"]?.jsonPrimitive?.content ?: "Global",
                                 thumbnail = obj["favicon"]?.jsonPrimitive?.content ?: "",
-                                duration = "LIVE"
+                                duration = "LIVE",
+                                streamUrl = streamUrl
                             )
                         )
                     }
@@ -118,11 +119,12 @@ object RadioBrowserApi {
                     if (streamUrl.isNotBlank()) {
                         stations.add(
                             Song(
-                                id = streamUrl,
+                                id = obj["stationuuid"]?.jsonPrimitive?.content ?: streamUrl,
                                 title = obj["name"]?.jsonPrimitive?.content?.trim() ?: "Unknown Station",
                                 artist = obj["country"]?.jsonPrimitive?.content ?: "Live Radio",
                                 thumbnail = obj["favicon"]?.jsonPrimitive?.content ?: "",
-                                duration = "LIVE"
+                                duration = "LIVE",
+                                streamUrl = streamUrl
                             )
                         )
                     }

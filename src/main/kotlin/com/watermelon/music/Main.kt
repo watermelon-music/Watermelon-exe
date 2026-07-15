@@ -21,7 +21,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.WindowPlacement
 import com.watermelon.music.navigation.NavController
 import com.watermelon.music.navigation.Screen
-import com.watermelon.music.ui.auth.LoginScreen
+import com.watermelon.music.ui.auth.*
 import com.watermelon.music.ui.components.Sidebar
 import com.watermelon.music.ui.components.CustomTitleBar
 import com.watermelon.music.ui.home.HomeScreen
@@ -36,10 +36,18 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.res.painterResource
 
 @Composable
 @Preview
-fun App(playerViewModel: PlayerViewModel, navController: NavController, isRightPanelVisible: Boolean, onToggleRightPanel: () -> Unit) {
+fun App(
+    playerViewModel: PlayerViewModel, 
+    authViewModel: AuthViewModel,
+    navController: NavController, 
+    searchQuery: String = "",
+    isRightPanelVisible: Boolean, 
+    onToggleRightPanel: () -> Unit
+) {
     var isFullScreenMode by remember { mutableStateOf(false) }
 
     MaterialTheme {
@@ -49,8 +57,14 @@ fun App(playerViewModel: PlayerViewModel, navController: NavController, isRightP
                 if (isFullScreenMode) {
                     com.watermelon.music.ui.player.FullScreenPlayerScreen(playerViewModel)
                 } else {
-                    // Only show Sidebar if not Splash or Login
-                    if (navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
+                    val isAuthScreen = navController.currentScreen is Screen.Splash || 
+                                       navController.currentScreen is Screen.Login ||
+                                       navController.currentScreen is Screen.Register ||
+                                       navController.currentScreen is Screen.ForgotPassword ||
+                                       navController.currentScreen is Screen.EmailVerification
+
+                    // Only show Sidebar if not on an auth screen
+                    if (!isAuthScreen) {
                         Sidebar(navController)
                     }
 
@@ -61,13 +75,38 @@ fun App(playerViewModel: PlayerViewModel, navController: NavController, isRightP
                             // Splash UI
                         }
                         is Screen.Login -> {
-                            LoginScreen(navController)
+                            LoginScreen(
+                                onNavigateToRegister = { navController.navigate(Screen.Register) },
+                                onNavigateToForgotPassword = { navController.navigate(Screen.ForgotPassword) },
+                                onAuthSuccess = { navController.navigate(Screen.Home) },
+                                viewModel = authViewModel
+                            )
+                        }
+                        is Screen.Register -> {
+                            RegisterScreen(
+                                onNavigateToLogin = { navController.navigate(Screen.Login) },
+                                onAuthSuccess = { navController.navigate(Screen.EmailVerification) },
+                                viewModel = authViewModel
+                            )
+                        }
+                        is Screen.ForgotPassword -> {
+                            ForgotPasswordScreen(
+                                onNavigateToLogin = { navController.navigate(Screen.Login) },
+                                viewModel = authViewModel
+                            )
+                        }
+                        is Screen.EmailVerification -> {
+                            EmailVerificationScreen(
+                                onVerified = { navController.navigate(Screen.Home) },
+                                onBackToLogin = { navController.navigate(Screen.Login) },
+                                viewModel = authViewModel
+                            )
                         }
                         is Screen.Home -> {
                             HomeScreen(playerViewModel)
                         }
                         is Screen.Search -> {
-                            com.watermelon.music.ui.search.SearchScreen(playerViewModel)
+                            com.watermelon.music.ui.search.SearchScreen(playerViewModel, searchQuery)
                         }
                         is Screen.Profile -> {
                             ProfileScreen(navController)
@@ -87,13 +126,27 @@ fun App(playerViewModel: PlayerViewModel, navController: NavController, isRightP
                 } // Closes else
                 
                 // Right Panel (Context Panel)
-                if (!isFullScreenMode && isRightPanelVisible && navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
-                    com.watermelon.music.ui.components.RightPanel(playerViewModel, onClose = onToggleRightPanel)
+                val isAuthScreenForRightPanel = navController.currentScreen is Screen.Splash || 
+                                                navController.currentScreen is Screen.Login ||
+                                                navController.currentScreen is Screen.Register ||
+                                                navController.currentScreen is Screen.ForgotPassword ||
+                                                navController.currentScreen is Screen.EmailVerification
+                if (!isFullScreenMode && isRightPanelVisible && !isAuthScreenForRightPanel) {
+                    com.watermelon.music.ui.components.RightPanel(
+                        playerViewModel = playerViewModel, 
+                        onClose = onToggleRightPanel,
+                        onLyricsClick = { isFullScreenMode = true }
+                    )
                 }
             } // Closes Row
 
-            // Bottom Player (always visible if not in Splash/Login)
-            if (navController.currentScreen !is Screen.Splash && navController.currentScreen !is Screen.Login) {
+            // Bottom Player (always visible if not in Splash/Login/Auth)
+            val isAuthScreenForPlayer = navController.currentScreen is Screen.Splash || 
+                                        navController.currentScreen is Screen.Login ||
+                                        navController.currentScreen is Screen.Register ||
+                                        navController.currentScreen is Screen.ForgotPassword ||
+                                        navController.currentScreen is Screen.EmailVerification
+            if (!isAuthScreenForPlayer) {
                 BottomPlayer(playerViewModel, onFullScreenToggle = { isFullScreenMode = !isFullScreenMode })
             }
         }
@@ -110,12 +163,14 @@ fun main() = application {
     }
     
     val playerViewModel = remember { PlayerViewModel() }
+    val authViewModel = remember { AuthViewModel() }
     val windowState = androidx.compose.ui.window.rememberWindowState(placement = WindowPlacement.Maximized)
 
     Window(
         onCloseRequest = ::exitApplication,
         state = windowState,
         title = "Watermelon",
+        icon = painterResource("watermelon_icon.png"),
         undecorated = true,
         onPreviewKeyEvent = { event ->
             if (event.type == KeyEventType.KeyDown) {
@@ -140,7 +195,17 @@ fun main() = application {
         }
     ) {
         var isRightPanelVisible by remember { mutableStateOf(false) } // Default to false until a song is played
-        val navController = remember { NavController(Screen.Home) }
+        val navController = remember { NavController(Screen.Login) }
+        var searchQuery by remember { mutableStateOf("") }
+        
+        val authRepository = remember { com.watermelon.music.data.AuthRepository() }
+        androidx.compose.runtime.LaunchedEffect(Unit) {
+            if (authRepository.checkSession()) {
+                navController.navigate(Screen.Home)
+            } else {
+                navController.navigate(Screen.Login)
+            }
+        }
         
         // Observe current song and show right panel when it changes
         val currentSong by playerViewModel.currentSong.collectAsState()
@@ -154,11 +219,20 @@ fun main() = application {
             CustomTitleBar(
                 state = windowState,
                 onClose = ::exitApplication,
-                navController = navController
+                navController = navController,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { 
+                    searchQuery = it
+                    if (it.isNotEmpty() && navController.currentScreen !is Screen.Search) {
+                        navController.navigate(Screen.Search)
+                    }
+                }
             )
             App(
                 playerViewModel = playerViewModel,
+                authViewModel = authViewModel,
                 navController = navController,
+                searchQuery = searchQuery,
                 isRightPanelVisible = isRightPanelVisible,
                 onToggleRightPanel = { isRightPanelVisible = false } // Only close it now
             )

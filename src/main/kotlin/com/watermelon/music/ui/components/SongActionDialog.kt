@@ -8,6 +8,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Lyrics
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
@@ -25,6 +26,7 @@ import com.watermelon.music.domain.model.Song
 @Composable
 fun SongActionDialog(
     song: Song,
+    isLiked: Boolean = false,
     isRadioOrBroadcast: Boolean = false,
     onDismiss: () -> Unit,
     onPlay: () -> Unit,
@@ -57,7 +59,11 @@ fun SongActionDialog(
             }
 
             // Like Option
-            ActionRow("Like", Icons.Default.Favorite, tint = Color(0xFFFF4040)) {
+            ActionRow(
+                if (isLiked) "Unlike" else "Like", 
+                if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder, 
+                tint = if (isLiked) Color(0xFFFF4040) else Color.White
+            ) {
                 onLike()
                 onDismiss()
             }

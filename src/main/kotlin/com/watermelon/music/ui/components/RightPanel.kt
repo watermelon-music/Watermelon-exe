@@ -14,6 +14,9 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,11 +28,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.watermelon.music.ui.player.PlayerViewModel
+import com.watermelon.music.ui.components.SongActionDialog
 
 @Composable
-fun RightPanel(playerViewModel: PlayerViewModel, onClose: () -> Unit) {
+fun RightPanel(playerViewModel: PlayerViewModel, onClose: () -> Unit, onLyricsClick: () -> Unit = {}) {
     val currentSong by playerViewModel.currentSong.collectAsState()
     val recommendedSongs by playerViewModel.recommendedSongs.collectAsState()
+    var showActionDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -51,7 +56,7 @@ fun RightPanel(playerViewModel: PlayerViewModel, onClose: () -> Unit) {
                 fontSize = 14.sp
             )
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Icon(Icons.Default.MoreHoriz, contentDescription = "Options", tint = Color.Gray, modifier = Modifier.size(20.dp).clickable {})
+                Icon(Icons.Default.MoreHoriz, contentDescription = "Options", tint = Color.Gray, modifier = Modifier.size(20.dp).clickable { showActionDialog = true })
                 Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Gray, modifier = Modifier.size(20.dp).clickable { onClose() })
             }
         }
@@ -160,5 +165,21 @@ fun RightPanel(playerViewModel: PlayerViewModel, onClose: () -> Unit) {
                 Text("Play a song to see details", color = Color.Gray)
             }
         }
+    }
+
+    if (showActionDialog && currentSong != null) {
+        val type by playerViewModel.currentType.collectAsState()
+        SongActionDialog(
+            song = currentSong!!,
+            isRadioOrBroadcast = type == "radio" || type == "broadcast",
+            onDismiss = { showActionDialog = false },
+            onPlay = { playerViewModel.togglePlayPause() },
+            onLike = { playerViewModel.toggleLike() },
+            onAddToPlaylist = { /* Future */ },
+            onLyrics = { 
+                showActionDialog = false
+                onLyricsClick() 
+            }
+        )
     }
 }

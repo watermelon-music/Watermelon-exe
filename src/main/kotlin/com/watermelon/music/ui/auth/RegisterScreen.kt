@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,18 +28,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
-val WatermelonRed = Color(0xFFFF3B3B)
-
 @Composable
-fun LoginScreen(
-    onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit,
+fun RegisterScreen(
+    onNavigateToLogin: () -> Unit,
     onAuthSuccess: () -> Unit,
     viewModel: AuthViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -46,11 +46,9 @@ fun LoginScreen(
         isVisible = true
     }
 
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) {
+    LaunchedEffect(uiState.needsEmailVerification) {
+        if (uiState.needsEmailVerification) {
             viewModel.clearMessage()
-            // Trigger library sync immediately after login so liked songs/radios appear right away
-            com.watermelon.music.data.LibraryEngine.syncWithCloud()
             onAuthSuccess()
         }
     }
@@ -91,7 +89,7 @@ fun LoginScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Your music. Your vibe.",
+                        text = "Join the community",
                         fontSize = 16.sp,
                         color = Color.LightGray,
                         textAlign = TextAlign.Center
@@ -119,9 +117,30 @@ fun LoginScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "Sign In",
+                            text = "Create Account",
                             fontSize = 24.sp,
                             color = Color.White
+                        )
+
+                        OutlinedTextField(
+                            value = username,
+                            onValueChange = { username = it },
+                            label = { Text("Username") },
+                            leadingIcon = { Icon(Icons.Default.Person, null, tint = WatermelonRed) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Text,
+                                imeAction = ImeAction.Next
+                            ),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = WatermelonRed,
+                                focusedLabelColor = WatermelonRed,
+                                cursorColor = WatermelonRed,
+                                textColor = Color.White,
+                                leadingIconColor = WatermelonRed
+                            )
                         )
 
                         OutlinedTextField(
@@ -156,6 +175,28 @@ fun LoginScreen(
                             visualTransformation = PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Next
+                            ),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = WatermelonRed,
+                                focusedLabelColor = WatermelonRed,
+                                cursorColor = WatermelonRed,
+                                textColor = Color.White,
+                                leadingIconColor = WatermelonRed
+                            )
+                        )
+
+                        OutlinedTextField(
+                            value = confirmPassword,
+                            onValueChange = { confirmPassword = it },
+                            label = { Text("Confirm Password") },
+                            leadingIcon = { Icon(Icons.Default.Lock, null, tint = WatermelonRed) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
                                 imeAction = ImeAction.Done
                             ),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -177,7 +218,11 @@ fun LoginScreen(
                         }
 
                         Button(
-                            onClick = { viewModel.signIn(email, password) },
+                            onClick = {
+                                if (password == confirmPassword) {
+                                    viewModel.signUp(username, email, password)
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(52.dp),
@@ -194,12 +239,8 @@ fun LoginScreen(
                                     strokeWidth = 2.dp
                                 )
                             } else {
-                                Text("Sign In", fontSize = 16.sp)
+                                Text("Sign Up", fontSize = 16.sp)
                             }
-                        }
-
-                        TextButton(onClick = onNavigateToForgotPassword) {
-                            Text("Forgot Password?", color = Color.LightGray)
                         }
                     }
                 }
@@ -211,13 +252,13 @@ fun LoginScreen(
                 visible = isVisible,
                 enter = fadeIn(tween(800, delayMillis = 400))
             ) {
-                TextButton(onClick = onNavigateToRegister) {
+                TextButton(onClick = onNavigateToLogin) {
                     Text(
-                        "Don't have an account? ",
+                        "Already have an account? ",
                         color = Color.LightGray
                     )
                     Text(
-                        "Create Account",
+                        "Sign In",
                         color = WatermelonRed
                     )
                 }

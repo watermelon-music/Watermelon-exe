@@ -10,6 +10,8 @@ import com.watermelon.music.domain.model.Song
 object AudioPlayer {
     private var mediaPlayer: MediaPlayer? = null
     
+    var onSongEnd: (() -> Unit)? = null
+    
     private val _currentSong = MutableStateFlow<Song?>(null)
     val currentSong: StateFlow<Song?> = _currentSong.asStateFlow()
 
@@ -58,9 +60,7 @@ object AudioPlayer {
                 setOnEndOfMedia {
                     _isPlaying.value = false
                     _progress.value = 1f
-                    
-                    val durationMins = totalDuration.toMinutes().toInt().coerceAtLeast(1)
-                    com.watermelon.music.data.GamificationEngine.addSongPlay(durationMins)
+                    onSongEnd?.invoke()
                 }
                 currentTimeProperty().addListener { _, _, newValue ->
                     val total = totalDuration.toMillis()

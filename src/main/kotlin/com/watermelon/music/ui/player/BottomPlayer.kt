@@ -34,8 +34,10 @@ fun BottomPlayer(viewModel: PlayerViewModel, onFullScreenToggle: () -> Unit) {
     val volume by viewModel.volume.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val library by viewModel.library.collectAsState()
-    
-    var showActionDialog by remember { mutableStateOf(false) }
+    val currentPositionMs by viewModel.currentPositionMs.collectAsState(initial = 0L)
+
+    val currentSeconds = (currentPositionMs / 1000).toInt()
+    val formattedCurrentTime = "${currentSeconds / 60}:${(currentSeconds % 60).toString().padStart(2, '0')}"
 
     if (currentSong == null) return
 
@@ -157,7 +159,7 @@ fun BottomPlayer(viewModel: PlayerViewModel, onFullScreenToggle: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth(0.8f).padding(top = 4.dp)
                 ) {
-                    Text("0:00", color = Color.Gray, fontSize = 10.sp)
+                    Text(formattedCurrentTime, color = Color.Gray, fontSize = 10.sp)
                     Slider(
                         value = progress,
                         onValueChange = {},
@@ -210,25 +212,6 @@ fun BottomPlayer(viewModel: PlayerViewModel, onFullScreenToggle: () -> Unit) {
                 tint = Color.Gray,
                 modifier = Modifier.size(20.dp).clickable { onFullScreenToggle() }
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "More Options",
-                tint = Color.Gray,
-                modifier = Modifier.size(20.dp).clickable { showActionDialog = true }
-            )
         }
-    }
-
-    if (showActionDialog && currentSong != null) {
-        SongActionDialog(
-            song = currentSong!!,
-            isRadioOrBroadcast = false,
-            onDismiss = { showActionDialog = false },
-            onPlay = { viewModel.togglePlayPause() },
-            onLike = { viewModel.toggleLike() },
-            onAddToPlaylist = { /* Show add to playlist dialog later */ },
-            onLyrics = { onFullScreenToggle() }
-        )
     }
 }

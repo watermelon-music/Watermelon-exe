@@ -60,6 +60,11 @@ compose.desktop {
             targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Exe)
             packageName = "Watermelon"
             packageVersion = "1.0.0"
+            windows {
+                iconFile.set(project.file("src/main/resources/watermelon.ico"))
+                menuGroup = "Watermelon"
+                upgradeUuid = "3d4a2c1e-5b6f-7890-abcd-ef1234567890"
+            }
         }
         buildTypes.release.proguard {
             isEnabled.set(false)

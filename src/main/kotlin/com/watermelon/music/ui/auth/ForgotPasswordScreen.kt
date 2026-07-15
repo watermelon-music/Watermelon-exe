@@ -12,7 +12,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,24 +20,18 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
-val WatermelonRed = Color(0xFFFF3B3B)
-
 @Composable
-fun LoginScreen(
-    onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit,
-    onAuthSuccess: () -> Unit,
+fun ForgotPasswordScreen(
+    onNavigateToLogin: () -> Unit,
     viewModel: AuthViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -46,12 +39,9 @@ fun LoginScreen(
         isVisible = true
     }
 
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) {
+    LaunchedEffect(uiState.resetSent) {
+        if (uiState.resetSent) {
             viewModel.clearMessage()
-            // Trigger library sync immediately after login so liked songs/radios appear right away
-            com.watermelon.music.data.LibraryEngine.syncWithCloud()
-            onAuthSuccess()
         }
     }
 
@@ -91,7 +81,7 @@ fun LoginScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Your music. Your vibe.",
+                        text = "Password Recovery",
                         fontSize = 16.sp,
                         color = Color.LightGray,
                         textAlign = TextAlign.Center
@@ -119,9 +109,16 @@ fun LoginScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "Sign In",
+                            text = "Reset Password",
                             fontSize = 24.sp,
                             color = Color.White
+                        )
+
+                        Text(
+                            text = "Enter your email and we'll send you a reset link.",
+                            fontSize = 14.sp,
+                            color = Color.LightGray,
+                            textAlign = TextAlign.Center
                         )
 
                         OutlinedTextField(
@@ -134,28 +131,6 @@ fun LoginScreen(
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Email,
-                                imeAction = ImeAction.Next
-                            ),
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = WatermelonRed,
-                                focusedLabelColor = WatermelonRed,
-                                cursorColor = WatermelonRed,
-                                textColor = Color.White,
-                                leadingIconColor = WatermelonRed
-                            )
-                        )
-
-                        OutlinedTextField(
-                            value = password,
-                            onValueChange = { password = it },
-                            label = { Text("Password") },
-                            leadingIcon = { Icon(Icons.Default.Lock, null, tint = WatermelonRed) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            singleLine = true,
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
                                 imeAction = ImeAction.Done
                             ),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -167,17 +142,24 @@ fun LoginScreen(
                             )
                         )
 
+                        if (uiState.resetSent) {
+                            Text(
+                                text = "Reset link sent! Check your email.",
+                                color = WatermelonRed,
+                                fontSize = 14.sp
+                            )
+                        }
+
                         if (uiState.errorMessage != null) {
                             Text(
                                 text = uiState.errorMessage!!,
                                 color = Color.Red,
-                                fontSize = 14.sp,
-                                modifier = Modifier.fillMaxWidth()
+                                fontSize = 14.sp
                             )
                         }
 
                         Button(
-                            onClick = { viewModel.signIn(email, password) },
+                            onClick = { viewModel.resetPassword(email) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(52.dp),
@@ -194,12 +176,8 @@ fun LoginScreen(
                                     strokeWidth = 2.dp
                                 )
                             } else {
-                                Text("Sign In", fontSize = 16.sp)
+                                Text("Send Reset Link", fontSize = 16.sp)
                             }
-                        }
-
-                        TextButton(onClick = onNavigateToForgotPassword) {
-                            Text("Forgot Password?", color = Color.LightGray)
                         }
                     }
                 }
@@ -211,15 +189,8 @@ fun LoginScreen(
                 visible = isVisible,
                 enter = fadeIn(tween(800, delayMillis = 400))
             ) {
-                TextButton(onClick = onNavigateToRegister) {
-                    Text(
-                        "Don't have an account? ",
-                        color = Color.LightGray
-                    )
-                    Text(
-                        "Create Account",
-                        color = WatermelonRed
-                    )
+                TextButton(onClick = onNavigateToLogin) {
+                    Text("Back to Sign In", color = WatermelonRed)
                 }
             }
         }

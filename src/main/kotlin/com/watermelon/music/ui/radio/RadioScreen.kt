@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.watermelon.music.data.repository.MusicCatalogRepository
 import com.watermelon.music.domain.model.Song
-import com.watermelon.music.ui.home.AdBannerPlaceholder
 import com.watermelon.music.data.LibraryEngine
 import com.watermelon.music.ui.components.SongActionDialog
 import com.watermelon.music.ui.player.PlayerViewModel
@@ -89,9 +88,6 @@ fun RadioScreen(playerViewModel: PlayerViewModel?) {
             modifier = Modifier.padding(bottom = 8.dp)
         )
         
-        AdBannerPlaceholder()
-        Spacer(modifier = Modifier.height(16.dp))
-        
         Text(
             text = "An endless algorithmic stream based on top hits.",
             color = Color.Gray,
@@ -106,10 +102,6 @@ fun RadioScreen(playerViewModel: PlayerViewModel?) {
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 itemsIndexed(radioSongs) { index, song ->
-                    if (index > 0 && index % 5 == 0) {
-                        AdBannerPlaceholder()
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
                     RadioSongRow(
                         song = song,
                         onSongRightClick = { selectedActionSong = song },

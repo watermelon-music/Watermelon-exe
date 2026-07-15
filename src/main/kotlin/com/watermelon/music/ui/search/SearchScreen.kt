@@ -22,12 +22,18 @@ import androidx.compose.ui.unit.sp
 import com.watermelon.music.domain.model.Category
 import com.watermelon.music.domain.model.HOME_CATEGORIES
 import com.watermelon.music.ui.player.PlayerViewModel
+import com.watermelon.music.ui.home.ModernSongCard
+import com.watermelon.music.ui.home.BroadcastCard
 
 @Composable
-fun SearchScreen(playerViewModel: PlayerViewModel?) {
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedFilter by remember { mutableStateOf("All") }
-    val filters = listOf("All", "Musics", "Radios", "Broadcasts")
+fun SearchScreen(playerViewModel: PlayerViewModel?, searchQuery: String = "") {
+    val viewModel = remember { SearchViewModel() }
+    var selectedFilter by remember { mutableStateOf("Music") }
+    val filters = listOf("Music", "Radio & Broadcast")
+
+    LaunchedEffect(searchQuery) {
+        viewModel.search(searchQuery)
+    }
 
     Column(
         modifier = Modifier
@@ -35,43 +41,6 @@ fun SearchScreen(playerViewModel: PlayerViewModel?) {
             .background(Color(0xFF0F0F0F))
             .padding(24.dp)
     ) {
-        // Search Bar
-        TextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .clip(RoundedCornerShape(28.dp)),
-            colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = Color(0xFF1E1E1E),
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                textColor = Color.White,
-                cursorColor = Color(0xFFFF4040)
-            ),
-            placeholder = {
-                Text("What do you want to listen to?", color = Color.Gray, fontSize = 16.sp)
-            },
-            leadingIcon = {
-                Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray, modifier = Modifier.size(24.dp))
-            },
-            trailingIcon = {
-                if (searchQuery.isNotEmpty()) {
-                    Icon(
-                        Icons.Default.Clear,
-                        contentDescription = "Clear",
-                        tint = Color.Gray,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable { searchQuery = "" }
-                    )
-                }
-            },
-            singleLine = true
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
 
         // Filters
         Row(
@@ -101,24 +70,13 @@ fun SearchScreen(playerViewModel: PlayerViewModel?) {
         Spacer(modifier = Modifier.height(32.dp))
 
         if (searchQuery.isEmpty()) {
-            // Browse All Sections
-            Text(
-                text = "Browse All",
-                color = Color.White,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(4),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(HOME_CATEGORIES) { category ->
-                    BrowseCategoryCard(category)
-                }
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Type to search for music, radio, and more...",
+                    color = Color.Gray,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         } else {
             // Search Results area
@@ -130,8 +88,39 @@ fun SearchScreen(playerViewModel: PlayerViewModel?) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             
-            // Dummy content for now, ideally hooks into a SearchViewModel
-            Text("Search functionality coming soon. Try browsing categories!", color = Color.Gray)
+            if (viewModel.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color(0xFFFF4040))
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(4),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    val showMusic = selectedFilter == "Music"
+                    val showRadio = selectedFilter == "Radio & Broadcast"
+
+                    if (showMusic && viewModel.musicResults.isNotEmpty()) {
+                        items(viewModel.musicResults) { song ->
+                            ModernSongCard(
+                                song = song,
+                                onClick = { playerViewModel?.playSong(song, viewModel.musicResults) }
+                            )
+                        }
+                    }
+
+                    if (showRadio && viewModel.radioResults.isNotEmpty()) {
+                        items(viewModel.radioResults) { song ->
+                            BroadcastCard(
+                                song = song,
+                                onClick = { playerViewModel?.playRadio(song, viewModel.radioResults, isBroadcast = true) }
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
