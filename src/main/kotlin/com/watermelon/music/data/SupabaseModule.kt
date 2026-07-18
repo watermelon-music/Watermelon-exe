@@ -17,8 +17,8 @@ object SupabaseModule {
         }
     }
 
-    private val SUPABASE_URL = properties.getProperty("SUPABASE_URL") ?: "https://your-supabase-url.supabase.co"
-    private val SUPABASE_KEY = properties.getProperty("SUPABASE_KEY") ?: "your-supabase-anon-key"
+    private val SUPABASE_URL = properties.getProperty("SUPABASE_URL") ?: "https://xljlceoircpibojirxob.supabase.co"
+    private val SUPABASE_KEY = properties.getProperty("SUPABASE_KEY") ?: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhsamxjZW9pcmNwaWJvamlyeG9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NzkzNzcsImV4cCI6MjA5NjI1NTM3N30.zmMpnCHT7_ZHQA9YvInLZL6V6xF9xNg1c2HHiub6TZE"
 
     val client: SupabaseClient by lazy {
         createSupabaseClient(
