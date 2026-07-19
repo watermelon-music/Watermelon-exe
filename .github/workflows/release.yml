@@ -24,14 +24,16 @@ jobs:
           cache: 'gradle'
 
       - name: Build Windows Executable
-        run: .\gradlew packageExe --no-daemon
+        run: .\gradlew packageDistributionForCurrentOS --no-daemon
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/compose/binaries/main/exe/*.exe
-          tag_name: v1.0.${{ github.run_number }}
-          name: Release v1.0.${{ github.run_number }}
+          files: |
+            build/compose/binaries/main/exe/*.exe
+            build/compose/binaries/main/msi/*.msi
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

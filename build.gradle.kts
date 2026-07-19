@@ -57,12 +57,15 @@ compose.desktop {
     application {
         mainClass = "com.watermelon.music.MainKt"
         nativeDistributions {
-            targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Exe)
+            targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Exe, org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi)
             packageName = "Watermelon"
             packageVersion = "1.0.0"
             windows {
                 iconFile.set(project.file("src/main/resources/watermelon.ico"))
-                menuGroup = "Watermelon"
+                menuGroup = "Watermelon Music"
+                menu = true
+                shortcut = true
+                dirChooser = true
                 upgradeUuid = "3d4a2c1e-5b6f-7890-abcd-ef1234567890"
             }
         }
