@@ -29,9 +29,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            build/compose/binaries/main/exe/*.exe
-            build/compose/binaries/main/msi/*.msi
+          files: build/compose/binaries/main/msi/*.msi
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           generate_release_notes: true

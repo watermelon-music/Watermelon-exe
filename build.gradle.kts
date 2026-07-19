@@ -57,7 +57,7 @@ compose.desktop {
     application {
         mainClass = "com.watermelon.music.MainKt"
         nativeDistributions {
-            targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Exe, org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi)
+            targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi)
             packageName = "Watermelon"
             packageVersion = "1.0.0"
             windows {
