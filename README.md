@@ -1,98 +1,161 @@
 # Watermelon Music Desktop 🍉
 
-Welcome to the **Watermelon Music Desktop** repository! This application is built using **Compose for Desktop** (Kotlin) and serves as the official desktop client for the Watermelon Music ecosystem.
+Welcome to the **Watermelon Music Desktop (Watermelon-exe)** repository! 
+This application is the official desktop client for the Watermelon Music ecosystem, built natively with **Compose for Desktop** (Kotlin). It seamlessly mirrors the Watermelon mobile application, offering a unified, high-performance, and feature-rich music streaming experience directly on your Windows PC.
 
-## 🏗 Information Architecture
+---
 
-Watermelon Desktop follows a modern, reactive architecture connecting the Compose UI to a robust data layer powered by Supabase and Render.
+## 🏗 Comprehensive Information Architecture
+
+The Watermelon Desktop app utilizes a robust, reactive architecture that tightly couples an immersive UI with a highly efficient backend and media engine.
 
 ```mermaid
 graph TD
-    UI[Desktop Compose UI] --> VM[ViewModels & State]
+    %% UI Components
+    UI[Desktop Compose UI] --> StateManager[State Management & ViewModels]
     
+    %% Player States
+    StateManager --> MiniPlayer[Mini Player State]
+    StateManager --> BigPlayer[Full Screen Big Player State]
+    
+    %% Core Engines
     subgraph Core Engines
-    VM --> Lib[LibraryEngine]
-    VM --> Game[GamificationEngine]
-    VM --> Premium[PremiumManager]
+    StateManager --> Lib[LibraryEngine]
+    StateManager --> Game[GamificationEngine]
+    StateManager --> Premium[PremiumManager]
     end
     
+    %% Data & Sync Layer
     subgraph Data & Sync
     Lib --> Auth[AuthRepository]
     Auth <--> Supabase[(Supabase PostgreSQL)]
+    Auth <--> Storage[(Supabase Storage - Profile DP)]
     end
     
+    %% Media & Network Layer
     subgraph Media & Search
-    VM --> Catalog[MusicCatalogRepository]
-    Catalog --> YTExtractor[LocalAudioExtractor / YT Downloader]
-    Catalog --> RenderAPI[Render API - Search Service]
+    StateManager --> Catalog[MusicCatalogRepository]
+    Catalog --> YTExtractor[LocalAudioExtractor / YTDL]
+    Catalog --> RenderAPI[Render API - Search & Metadata Service]
+    Catalog --> LyricsAPI[Lyrics & Subtitles Service]
     Catalog --> RadioAPI[RadioBrowserApi]
     end
     
-    VM --> Player[Audio Player Engine]
+    %% Audio Engine
+    StateManager --> Player[Background Audio Engine]
+    Player --> AudioOutput[System Audio & Background Playback]
 ```
 
-## 🔄 Core Workflow
+---
 
-The typical user journey for discovering and playing a song involves seamless communication between the UI, the custom search API, and our Supabase backend.
+## 🔄 Detailed Core Workflow
+
+The user journey—from discovering a song to playing it in the background—involves multiple highly optimized subsystems.
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant UI
+    participant UI as Compose UI
     participant Catalog as MusicCatalogRepository
-    participant API as Render API / YouTube
-    participant DB as Supabase (AuthRepository)
+    participant YTDL as YouTube Extractor
+    participant API as Render API
+    participant DB as Supabase
+    participant Audio as Audio Engine
     
-    User->>UI: Search for Song
-    UI->>Catalog: request search results
+    User->>UI: Search for "YT Music Mode" Song
+    UI->>Catalog: Request search results
     Catalog->>API: GET /search (onrender.com)
-    API-->>Catalog: JSON Results
-    Catalog-->>UI: Display Songs
+    API-->>Catalog: JSON Results & Metadata
+    Catalog-->>UI: Display Songs in UI
     
-    User->>UI: Add to Favorites / Playlist
-    UI->>DB: upsert to favorites / playlist_songs
-    DB-->>UI: Sync Success
+    User->>UI: Click Play
+    UI->>Catalog: Fetch Stream URL
+    Catalog->>YTDL: Resolve YouTube/YT Music ID
+    YTDL-->>Catalog: High-Quality Audio Stream URL
     
-    User->>UI: Play Song
-    UI->>Catalog: get stream URL
-    Catalog->>API: extract audio
-    API-->>Catalog: audio stream URL
-    Catalog-->>UI: Play via Audio Engine
+    UI->>Audio: Pass Stream URL
+    Audio-->>User: Starts Playing Music (Background Capable)
+    
+    UI->>Catalog: Fetch Subtitles/Lyrics
+    Catalog->>API: Request synchronized lyrics
+    API-->>UI: Render Subtitles in Big Player
+    
+    User->>UI: Update Profile DP
+    UI->>DB: Upload image to Supabase Storage
+    DB-->>UI: Sync DP across all devices
 ```
 
+---
+
+## 🚀 Deep Dive: Core Features & Functionality
+
+### 1. YouTube Extractor (YTDL) & Audio Playback
+Watermelon Desktop does not rely on simple web views. It natively extracts audio streams:
+- **How it works:** When you play a song, `LocalAudioExtractor` and `YouTubeDownloader` kick into gear. They resolve the YouTube / YT Music ID and extract the raw, high-quality audio stream URL.
+- **Audio Engine:** This stream is fed directly into the native Audio Engine.
+- **Background Playback:** Because it is a native desktop application, the audio engine runs on a dedicated thread. This allows you to minimize the application, and the music will continue to play flawlessly in the background without interruptions. Windows manages the audio output natively.
+
+### 2. YT Music Mode
+- The application interfaces with our custom **Render API service** to provide a seamless "YT Music Mode". This mode accurately fetches metadata, albums, artist information, and search results mirroring the vast YT Music catalog, delivering exactly what the user is searching for in milliseconds.
+
+### 3. Subtitles & Lyrics
+- **Fetching:** As soon as a song begins, the application queries our subtitle/lyrics endpoints.
+- **Rendering:** The UI parses the timestamped LRC data (or raw text) and dynamically highlights the current lyric inside the **Big Player**, keeping you perfectly in sync with the song.
+
+### 4. Big Player vs. Mini Player
+- **Big Player:** When expanded, the Big Player dominates the screen, providing a rich, immersive experience. It displays high-resolution album art, synchronized subtitles, upcoming queue items, and advanced playback controls.
+- **Mini Player:** For multitasking, the UI transitions smoothly into the Mini Player. This compact, always-accessible widget sits unobtrusively on your screen, offering essential controls (Play, Pause, Skip) and current track info while you focus on other desktop tasks.
+
+### 5. Profile & Display Picture (DP) System
+- Powered by `AuthRepository`, your Watermelon Profile is perfectly synced.
+- **DP Management:** When you upload or change your Profile Picture (DP), the application securely authenticates and uploads the image to **Supabase Storage**. It then updates your user record, instantly reflecting the new DP across both your desktop and mobile applications.
+
+### 6. Gamification Engine (XP & Leveling)
+- The desktop app features a comprehensive `GamificationEngine`.
+- **How it works:** Every time you listen to a song, explore a new artist, or curate a playlist, the engine calculates and awards you XP.
+- As you hit XP thresholds, you level up. This system tracks your engagement and rewards you, turning your music listening habits into an interactive, rewarding experience.
+
+### 7. Direct Database Syncing
+- All your Favorites, Playlists, and Radio Stations are directly synced with **Supabase PostgreSQL**. 
+- Adding a song to a playlist on your PC will instantly appear on your mobile app, and vice versa. There is zero polling delay—data is fetched and updated reactively.
+
+---
+
 ## 📂 File Arrangement & Repository Structure
+
+Understanding the codebase is simple. The architecture is cleanly divided into data, domain, and UI layers:
 
 ```text
 Watermelon-exe/
 ├── src/main/kotlin/com/watermelon/music/
-│   ├── Main.kt                     # Application Entry Point & Window Setup
+│   ├── Main.kt                     # Application Entry Point & Window Initialization
 │   ├── data/
-│   │   ├── AuthRepository.kt       # Supabase Authentication & Syncing
-│   │   ├── LibraryEngine.kt        # Local Library State Management
-│   │   ├── GamificationEngine.kt   # XP, Leveling, and Achievements
-│   │   ├── PremiumManager.kt       # Premium Features Control
+│   │   ├── AuthRepository.kt       # Supabase Auth, Profile DP, Playlists & Syncing
+│   │   ├── LibraryEngine.kt        # Local Library State & Offline Management
+│   │   ├── GamificationEngine.kt   # XP, Leveling, and User Rewards System
+│   │   ├── PremiumManager.kt       # Premium Features Control & Validation
 │   │   ├── SupabaseModule.kt       # PostgREST Client Initialization
-│   │   ├── remote/                 # API Interfaces (Retrofit, Render, RadioBrowser)
-│   │   └── youtube/                # Audio Extraction & Downloading
+│   │   ├── remote/                 # API Interfaces (Render Search, RadioBrowser)
+│   │   └── youtube/                # YTDL: LocalAudioExtractor & YouTubeDownloader
 │   ├── repository/
-│   │   └── MusicCatalogRepository.kt # Centralized Music Fetching
-│   ├── domain/                     # Business Logic Models
-│   └── ui/                         # Compose UI Components & Screens
-├── build.gradle.kts                # Gradle Configuration & Dependencies
-└── README.md                       # This File
+│   │   └── MusicCatalogRepository.kt # Centralized Music Fetching & Subtitles
+│   ├── domain/                     # Business Logic Models & Dataclasses
+│   └── ui/                         # Compose UI: Big Player, Mini Player, Screens
+├── build.gradle.kts                # Gradle Configuration & Desktop Build Scripts
+└── README.md                       # This Master Documentation File
 ```
 
-## 🚀 Getting Started
+---
 
-1. **Prerequisites:** Ensure you have JDK 17+ installed.
-2. **Build:** Run `./gradlew packageDistributionForCurrentOS` to generate the `.exe` (or `.dmg` / `.deb` depending on OS).
-3. **Run:** Execute the generated binary from the `build/compose/binaries` directory.
+## 🛠 Compilation & Deployment
 
-## 🛠 Features
-- **Direct Database Syncing:** Favorites and playlists instantly sync with your mobile app via Supabase.
-- **Background Audio Fetching:** Real-time stream URL extraction.
-- **Global Radio Station Integration:** Stream thousands of radio stations natively.
-- **Gamification:** Earn XP and level up as you listen.
+To compile the application for Windows:
+1. **Prerequisites:** Ensure you have JDK 17+ installed on your machine.
+2. **Compile:** Run the gradle command:
+   ```bash
+   ./gradlew packageDistributionForCurrentOS
+   ```
+3. **Output:** The final `.exe` installer and standalone binary will be generated inside `build/compose/binaries/main/exe/`.
 
 ---
 *Built with ❤️ for the Watermelon Music Ecosystem.*
